@@ -14,16 +14,17 @@ export async function chat(messages: Message[]) {
             messages: messages,
         })
         return { message: response.message, success: true }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error calling Ollama:', error)
         let errorMessage = 'Maaf, terjadi kesalahan saat menghubungi model AI.'
-        if (error.cause && error.cause.code === 'ECONNREFUSED') {
+        const err = error as { cause?: { code?: string }; message?: string }
+        if (err.cause && err.cause.code === 'ECONNREFUSED') {
             errorMessage = 'Tidak dapat terhubung ke Ollama. Pastikan Ollama sedang berjalan di komputer anda (port 11434).'
         }
         return {
             message: { role: 'assistant', content: errorMessage },
             success: false,
-            error: error.message
+            error: err.message
         }
     }
 }

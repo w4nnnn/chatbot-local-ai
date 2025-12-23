@@ -569,7 +569,7 @@ function SidebarMenuAction({
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-          "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
+        "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
         className
       )}
       {...props}
@@ -599,6 +599,10 @@ function SidebarMenuBadge({
   )
 }
 
+// Fixed skeleton widths to avoid impure Math.random during render
+const SKELETON_WIDTHS = ["60%", "70%", "55%", "80%", "65%", "75%", "50%", "85%", "90%", "58%"]
+let skeletonWidthIndex = 0
+
 function SidebarMenuSkeleton({
   className,
   showIcon = false,
@@ -606,9 +610,11 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
+  // Use deterministic width from predefined array
   const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
+    const w = SKELETON_WIDTHS[skeletonWidthIndex % SKELETON_WIDTHS.length]
+    skeletonWidthIndex++
+    return w
   }, [])
 
   return (

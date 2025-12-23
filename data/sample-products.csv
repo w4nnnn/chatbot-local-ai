@@ -1,0 +1,99 @@
+nama_produk,kategori,harga,stok,satuan,supplier,berat_gram,deskripsi
+Beras Premium 5kg,Sembako,75000,150,pcs,PT Beras Nusantara,5000,Beras premium kualitas terbaik
+Minyak Goreng 2L,Sembako,35000,200,botol,CV Minyak Jaya,2000,Minyak goreng sawit murni
+Gula Pasir 1kg,Sembako,15000,300,pcs,PT Gula Manis,1000,Gula pasir putih kristal
+Tepung Terigu 1kg,Sembako,12000,250,pcs,PT Bogasari,1000,Tepung terigu serbaguna
+Telur Ayam 1kg,Sembako,28000,100,kg,Peternakan Sejahtera,1000,Telur ayam segar
+Susu UHT 1L,Minuman,18000,180,kotak,PT Ultra Jaya,1000,Susu UHT rasa original
+Kopi Bubuk 250g,Minuman,25000,120,pcs,PT Kopi Nusantara,250,Kopi bubuk asli Toraja
+Teh Celup 25pcs,Minuman,8500,200,box,PT Teh Sosro,50,Teh celup wangi melati
+Air Mineral 600ml,Minuman,3500,500,botol,PT Aqua Golden,600,Air mineral segar
+Sirup ABC 650ml,Minuman,15000,90,botol,PT ABC President,650,Sirup rasa cocopandan
+Mie Instan Goreng,Makanan Instan,3000,400,pcs,PT Indofood,85,Mie goreng instant
+Mie Instan Kuah,Makanan Instan,2800,350,pcs,PT Indofood,85,Mie kuah instant
+Sarden Kaleng,Makanan Instan,15000,100,kaleng,PT ABC President,155,Sarden dalam saus tomat
+Kornet Sapi,Makanan Instan,28000,80,kaleng,PT Cip,340,Kornet daging sapi
+Bubur Instan,Makanan Instan,5000,150,pcs,PT Mayora,50,Bubur ayam instan
+Sabun Mandi Batang,Perawatan Tubuh,4500,300,pcs,PT Unilever,90,Sabun mandi antibakteri
+Sabun Mandi Cair 500ml,Perawatan Tubuh,25000,120,botol,PT Unilever,500,Sabun cair wangi segar
+Shampoo 170ml,Perawatan Tubuh,22000,150,botol,PT Unilever,170,Shampoo anti ketombe
+Pasta Gigi 150g,Perawatan Tubuh,12000,200,tube,PT Unilever,150,Pasta gigi whitening
+Deodorant Roll On,Perawatan Tubuh,18000,100,pcs,PT Unilever,50,Deodorant 48 jam
+Deterjen Bubuk 1kg,Kebersihan,25000,180,pcs,PT Wings,1000,Deterjen bubuk wangi
+Deterjen Cair 1L,Kebersihan,35000,100,botol,PT Wings,1000,Deterjen cair konsentrat
+Pelembut Pakaian 900ml,Kebersihan,28000,90,botol,PT Unilever,900,Pelembut wangi bunga
+Pembersih Lantai 800ml,Kebersihan,18000,120,botol,PT Wings,800,Pembersih lantai aroma pinus
+Sabun Cuci Piring 750ml,Kebersihan,15000,200,botol,PT Wings,750,Sabun cuci piring jeruk nipis
+Snack Kentang 68g,Makanan Ringan,10000,250,pcs,PT Indofood,68,Keripik kentang gurih
+Biskuit Kaleng 500g,Makanan Ringan,45000,80,kaleng,PT Mayora,500,Biskuit aneka rasa
+Wafer Coklat 145g,Makanan Ringan,12000,180,pcs,PT Mayora,145,Wafer rasa coklat
+Coklat Batang 100g,Makanan Ringan,18000,150,pcs,PT Delfi,100,Coklat susu batangan
+Kacang Atom 200g,Makanan Ringan,15000,120,pcs,PT Dua Kelinci,200,Kacang atom pedas
+Saus Sambal 340ml,Bumbu Dapur,14000,200,botol,PT ABC President,340,Saus sambal pedas
+Saus Tomat 340ml,Bumbu Dapur,12000,180,botol,PT ABC President,340,Saus tomat manis
+Kecap Manis 600ml,Bumbu Dapur,22000,150,botol,PT Bango,600,Kecap manis legit
+Garam 250g,Bumbu Dapur,5000,300,pcs,PT Unichem,250,Garam halus beryodium
+Merica Bubuk 50g,Bumbu Dapur,15000,100,pcs,PT Koepoe Koepoe,50,Merica bubuk halus
+Margarin 250g,Bumbu Dapur,18000,120,pcs,PT Simas,250,Margarin untuk masak
+Mentega 200g,Bumbu Dapur,28000,80,pcs,PT Anchor,200,Mentega unsalted
+Tepung Maizena 150g,Bumbu Dapur,8000,150,pcs,PT Maizenaku,150,Tepung maizena murni
+Santan Kelapa 200ml,Bumbu Dapur,10000,100,pcs,PT Kara,200,Santan kelapa instant
+Bumbu Penyedap 100g,Bumbu Dapur,5500,250,pcs,PT Ajinomoto,100,Penyedap rasa ayam
+Susu Kental Manis,Dairy,12000,200,kaleng,PT Frisian Flag,385,Susu kental manis
+Keju Cheddar 165g,Dairy,32000,60,pcs,PT Kraft,165,Keju cheddar slice
+Yogurt 200ml,Dairy,8000,100,cup,PT Cimory,200,Yogurt rasa strawberry
+Butter 227g,Dairy,45000,50,pcs,PT Anchor,227,Butter tawar premium
+Whipping Cream 250ml,Dairy,35000,40,pcs,PT Elle Vire,250,Whipping cream segar
+Daging Ayam 1kg,Protein,38000,80,kg,Peternakan Sejahtera,1000,Daging ayam segar
+Daging Sapi 500g,Protein,75000,50,pcs,PT Meat Shop,500,Daging sapi has dalam
+Ikan Salmon 200g,Protein,85000,30,pcs,PT Frozen Fish,200,Fillet salmon import
+Udang Kupas 250g,Protein,55000,40,pcs,PT Frozen Fish,250,Udang kupas segar
+Tahu Putih 10pcs,Protein,8000,100,pack,Tahu Sumedang,500,Tahu putih segar
+Tempe 200g,Protein,5000,150,pcs,Tempe Malang,200,Tempe kedelai murni
+Sosis Ayam 500g,Protein,35000,80,pack,PT So Good,500,Sosis ayam premium
+Nugget Ayam 500g,Protein,42000,70,pack,PT So Good,500,Nugget ayam original
+Bakso Sapi 300g,Protein,32000,60,pack,PT Bernardi,300,Bakso sapi urat
+Wortel 500g,Sayuran,12000,100,pcs,Pasar Sayur,500,Wortel segar import
+Kentang 1kg,Sayuran,18000,80,kg,Pasar Sayur,1000,Kentang dieng
+Bawang Merah 250g,Sayuran,15000,120,pcs,Pasar Sayur,250,Bawang merah brebes
+Bawang Putih 250g,Sayuran,20000,100,pcs,Pasar Sayur,250,Bawang putih tunggal
+Cabai Merah 250g,Sayuran,25000,80,pcs,Pasar Sayur,250,Cabai merah keriting
+Tomat 500g,Sayuran,10000,100,pcs,Pasar Sayur,500,Tomat merah segar
+Kangkung,Sayuran,5000,150,ikat,Pasar Sayur,200,Kangkung segar
+Bayam,Sayuran,5000,150,ikat,Pasar Sayur,200,Bayam hijau segar
+Sawi Hijau,Sayuran,6000,120,ikat,Pasar Sayur,300,Sawi hijau segar
+Brokoli 300g,Sayuran,22000,60,pcs,Pasar Sayur,300,Brokoli import segar
+Apel Fuji 1kg,Buah,45000,80,kg,Import Buah,1000,Apel fuji manis
+Jeruk Mandarin 1kg,Buah,38000,100,kg,Import Buah,1000,Jeruk mandarin manis
+Pisang Cavendish 1kg,Buah,25000,120,sisir,Pasar Buah,1000,Pisang cavendish
+Semangka 3kg,Buah,35000,50,buah,Pasar Buah,3000,Semangka merah manis
+Melon 2kg,Buah,28000,60,buah,Pasar Buah,2000,Melon hijau manis
+Anggur Merah 500g,Buah,55000,40,pack,Import Buah,500,Anggur merah seedless
+Mangga Harum Manis 1kg,Buah,32000,70,kg,Pasar Buah,1000,Mangga harum manis
+Pepaya 2kg,Buah,20000,80,buah,Pasar Buah,2000,Pepaya california
+Nanas 1.5kg,Buah,18000,60,buah,Pasar Buah,1500,Nanas madu
+Strawberry 250g,Buah,35000,50,pack,Import Buah,250,Strawberry segar
+Roti Tawar,Roti & Kue,15000,100,pcs,PT Sari Roti,400,Roti tawar gandum
+Roti Manis,Roti & Kue,18000,80,pack,PT Sari Roti,300,Roti manis isi coklat
+Donat,Roti & Kue,5000,150,pcs,Toko Kue,80,Donat gula
+Brownies,Roti & Kue,25000,60,pack,Toko Kue,200,Brownies coklat panggang
+Cake Slice,Roti & Kue,20000,50,pcs,Toko Kue,150,Cake slice aneka rasa
+Es Krim 1L,Frozen,55000,40,cup,PT Walls,1000,Es krim vanilla
+Frozen Pizza,Frozen,45000,30,pcs,PT Pizza Hut,350,Pizza frozen pepperoni
+Kentang Goreng 1kg,Frozen,38000,50,pack,PT McCain,1000,Kentang goreng beku
+Dimsum Mix,Frozen,42000,40,pack,Dimsum House,500,Dimsum aneka rasa
+Es Teh Botol 450ml,Minuman,5000,300,botol,PT Sosro,450,Es teh manis botol
+Jus Jeruk 1L,Minuman,22000,80,kotak,PT Buavita,1000,Jus jeruk asli
+Pocari Sweat 500ml,Minuman,8000,150,botol,PT Otsuka,500,Minuman isotonik
+Yakult 5pcs,Minuman,12000,100,pack,PT Yakult,325,Minuman probiotik
+Energen 30g,Minuman,3500,200,sachet,PT Mayora,30,Sereal instan
+Vitamin C 500mg,Kesehatan,35000,80,botol,PT Kalbe,30,Vitamin C tablet
+Minyak Kayu Putih 60ml,Kesehatan,25000,100,botol,PT Cap Lang,60,Minyak kayu putih
+Madu Murni 250ml,Kesehatan,65000,50,botol,PT Madu Nusantara,250,Madu murni asli
+Obat Nyamuk Bakar,Kebersihan,12000,150,pack,PT Baygon,10,Obat nyamuk bakar
+Pewangi Ruangan,Kebersihan,28000,80,pcs,PT Glade,180,Pewangi ruangan lavender
+Kapas 100g,Kesehatan,15000,100,pack,PT Selection,100,Kapas wajah lembut
+Tissue 250 lembar,Kebersihan,18000,200,pack,PT Paseo,250,Tissue wajah lembut
+Tisu Basah 50pcs,Kebersihan,22000,100,pack,PT Mitu,50,Tisu basah antibakteri
+Pembalut Wanita,Kesehatan,25000,120,pack,PT Softex,10,Pembalut wanita wings
+Masker 50pcs,Kesehatan,45000,60,box,PT Sensi,50,Masker medis 3 ply
