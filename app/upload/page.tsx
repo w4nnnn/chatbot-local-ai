@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { parseFile, saveToDatabase, getUploadedFiles, deleteFile, type ParsedData } from "@/actions/upload";
+import { embedFileData, deleteFileEmbeddings } from "@/actions/embed";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,7 +20,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Upload, FileSpreadsheet, Trash2, Eye, Loader2, CheckCircle2, XCircle, FileUp } from "lucide-react";
+import { Upload, FileSpreadsheet, Trash2, Eye, Loader2, CheckCircle2, XCircle, FileUp, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 type UploadedFileInfo = {
@@ -31,6 +32,13 @@ type UploadedFileInfo = {
     createdAt: Date;
 };
 
+type SaveProgress = {
+    step: 'idle' | 'saving' | 'embedding' | 'done' | 'error';
+    message: string;
+    textColumns?: string[];
+    numberColumns?: string[];
+};
+
 export default function UploadPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -38,6 +46,7 @@ export default function UploadPage() {
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFileInfo[]>([]);
     const [previewLimit, setPreviewLimit] = useState(10);
     const [isDragging, setIsDragging] = useState(false);
+    const [saveProgress, setSaveProgress] = useState<SaveProgress>({ step: 'idle', message: '' });
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Load uploaded files on mount
@@ -111,21 +120,60 @@ export default function UploadPage() {
         }
     }
 
-    async function handleSave() {
+    async function handleSaveAndEmbed() {
         if (!parsedData) return;
 
         setIsSaving(true);
-        const result = await saveToDatabase(parsedData);
 
-        if (result.success) {
-            toast.success(result.message);
-            setParsedData(null);
+        // Step 1: Simpan ke Database
+        setSaveProgress({ step: 'saving', message: 'Menyimpan data ke database...' });
+
+        const saveResult = await saveToDatabase(parsedData);
+
+        if (!saveResult.success) {
+            setSaveProgress({ step: 'error', message: saveResult.message });
+            toast.error(saveResult.message);
+            setIsSaving(false);
+            return;
+        }
+
+        const fileId = saveResult.id;
+        if (!fileId) {
+            setSaveProgress({ step: 'error', message: 'Gagal mendapatkan ID file' });
+            setIsSaving(false);
+            return;
+        }
+
+        // Step 2: Embed ke LanceDB
+        setSaveProgress({ step: 'embedding', message: 'Menganalisis kolom dan membuat embedding...' });
+
+        const embedResult = await embedFileData(fileId);
+
+        if (embedResult.success) {
+            setSaveProgress({
+                step: 'done',
+                message: `Berhasil! ${embedResult.embeddedCount} baris di-embed`,
+                textColumns: embedResult.textColumns,
+                numberColumns: embedResult.numberColumns,
+            });
+
+            toast.success('Data berhasil disimpan dan di-embed!', {
+                description: `Kolom teks: ${embedResult.textColumns?.join(', ')}`,
+            });
+
+            // Reset setelah delay untuk menampilkan status done
+            setTimeout(() => {
+                setParsedData(null);
+                setSaveProgress({ step: 'idle', message: '' });
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                }
+            }, 2000);
+
             await loadUploadedFiles();
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
         } else {
-            toast.error(result.message);
+            setSaveProgress({ step: 'error', message: embedResult.message });
+            toast.error('Data tersimpan tapi embedding gagal: ' + embedResult.message);
         }
 
         setIsSaving(false);
@@ -133,12 +181,17 @@ export default function UploadPage() {
 
     function handleCancel() {
         setParsedData(null);
+        setSaveProgress({ step: 'idle', message: '' });
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
         }
     }
 
     async function handleDelete(id: number) {
+        // Hapus embeddings terlebih dahulu
+        await deleteFileEmbeddings(id);
+
+        // Lalu hapus file dari SQLite
         const result = await deleteFile(id);
         if (result.success) {
             toast.success(result.message);
@@ -320,6 +373,92 @@ export default function UploadPage() {
                                 </div>
                             )}
 
+                            {/* Progress Indicator */}
+                            {saveProgress.step !== 'idle' && (
+                                <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                                    <div className="space-y-3">
+                                        {/* Step 1: Saving */}
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${saveProgress.step === 'saving'
+                                                ? 'bg-blue-500/20 border-2 border-blue-500'
+                                                : ['embedding', 'done'].includes(saveProgress.step)
+                                                    ? 'bg-green-500/20 border-2 border-green-500'
+                                                    : saveProgress.step === 'error'
+                                                        ? 'bg-red-500/20 border-2 border-red-500'
+                                                        : 'bg-slate-700 border-2 border-slate-600'
+                                                }`}>
+                                                {saveProgress.step === 'saving' ? (
+                                                    <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
+                                                ) : ['embedding', 'done'].includes(saveProgress.step) ? (
+                                                    <CheckCircle2 className="h-4 w-4 text-green-400" />
+                                                ) : saveProgress.step === 'error' ? (
+                                                    <XCircle className="h-4 w-4 text-red-400" />
+                                                ) : (
+                                                    <span className="text-slate-400 text-sm">1</span>
+                                                )}
+                                            </div>
+                                            <span className={`text-sm ${saveProgress.step === 'saving' ? 'text-blue-400'
+                                                : ['embedding', 'done'].includes(saveProgress.step) ? 'text-green-400'
+                                                    : 'text-slate-400'
+                                                }`}>
+                                                Menyimpan ke Database
+                                            </span>
+                                        </div>
+
+                                        {/* Step 2: Embedding */}
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${saveProgress.step === 'embedding'
+                                                ? 'bg-purple-500/20 border-2 border-purple-500'
+                                                : saveProgress.step === 'done'
+                                                    ? 'bg-green-500/20 border-2 border-green-500'
+                                                    : saveProgress.step === 'error' && saveProgress.message.includes('embed')
+                                                        ? 'bg-red-500/20 border-2 border-red-500'
+                                                        : 'bg-slate-700 border-2 border-slate-600'
+                                                }`}>
+                                                {saveProgress.step === 'embedding' ? (
+                                                    <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+                                                ) : saveProgress.step === 'done' ? (
+                                                    <CheckCircle2 className="h-4 w-4 text-green-400" />
+                                                ) : (
+                                                    <span className="text-slate-400 text-sm">2</span>
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <span className={`text-sm ${saveProgress.step === 'embedding' ? 'text-purple-400'
+                                                    : saveProgress.step === 'done' ? 'text-green-400'
+                                                        : 'text-slate-400'
+                                                    }`}>
+                                                    {saveProgress.step === 'done' ? (
+                                                        <>
+                                                            Embedding Selesai
+                                                            <span className="block text-xs text-slate-500 mt-0.5">
+                                                                Kolom teks: {saveProgress.textColumns?.join(', ')}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        'Menganalisis & Embedding ke LanceDB'
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Progress Message */}
+                                        <div className={`text-sm mt-2 p-2 rounded ${saveProgress.step === 'done'
+                                            ? 'bg-green-500/10 text-green-400'
+                                            : saveProgress.step === 'error'
+                                                ? 'bg-red-500/10 text-red-400'
+                                                : 'bg-slate-700/50 text-slate-300'
+                                            }`}>
+                                            {saveProgress.step === 'done' && <CheckCircle2 className="inline h-4 w-4 mr-2" />}
+                                            {saveProgress.step === 'error' && <XCircle className="inline h-4 w-4 mr-2" />}
+                                            {saveProgress.step === 'saving' && <Loader2 className="inline h-4 w-4 mr-2 animate-spin" />}
+                                            {saveProgress.step === 'embedding' && <Sparkles className="inline h-4 w-4 mr-2 animate-pulse" />}
+                                            {saveProgress.message}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <Separator className="bg-slate-800" />
 
                             {/* Actions */}
@@ -327,25 +466,31 @@ export default function UploadPage() {
                                 <Button
                                     variant="outline"
                                     onClick={handleCancel}
+                                    disabled={isSaving}
                                     className="border-slate-700 text-slate-300 hover:bg-slate-800"
                                 >
                                     <XCircle className="h-4 w-4 mr-2" />
                                     Batal
                                 </Button>
                                 <Button
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                                    onClick={handleSaveAndEmbed}
+                                    disabled={isSaving || saveProgress.step === 'done'}
+                                    className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700"
                                 >
                                     {isSaving ? (
                                         <>
                                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                            Menyimpan...
+                                            Memproses...
+                                        </>
+                                    ) : saveProgress.step === 'done' ? (
+                                        <>
+                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                            Selesai!
                                         </>
                                     ) : (
                                         <>
-                                            <CheckCircle2 className="h-4 w-4 mr-2" />
-                                            Simpan ke Database
+                                            <Sparkles className="h-4 w-4 mr-2" />
+                                            Simpan & Embed
                                         </>
                                     )}
                                 </Button>
@@ -405,6 +550,7 @@ export default function UploadPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
+                                            {/* Delete Button */}
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button

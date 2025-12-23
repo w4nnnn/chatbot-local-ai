@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    "@lancedb/lancedb",
+    "better-sqlite3",
+    "apache-arrow",
+  ],
 };
 
 export default nextConfig;
