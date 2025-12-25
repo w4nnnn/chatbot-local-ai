@@ -1,21 +1,36 @@
 'use client'
 
-import { ChatInterface } from '@/components/chat-interface'
+import { useState } from 'react'
+import { MainLayout, type MenuType } from '@/components/layout'
+import { ChatInterface } from '@/components/chat'
+import { UploadContent } from '@/components/upload'
+import { Toaster } from 'sonner'
 
-export default function ChatPage() {
+export default function HomePage() {
+    const [activeMenu, setActiveMenu] = useState<MenuType>("chat");
+
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50/50 p-4 md:p-24 dark:bg-gray-950/50">
-            <div className="w-full max-w-2xl space-y-4">
-                <div className="text-center space-y-2 mb-8">
-                    <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl text-foreground">
-                        Chatbot Assistant
-                    </h1>
-                    <p className="text-muted-foreground md:text-lg">
-                        Berinteraksi dengan model AI lokal Anda dengan mudah.
-                    </p>
-                </div>
-                <ChatInterface />
-            </div>
-        </main>
+        <>
+            <Toaster
+                theme="dark"
+                position="top-center"
+                toastOptions={{
+                    style: {
+                        background: 'rgb(30 41 59)',
+                        border: '1px solid rgb(51 65 85)',
+                        color: 'rgb(226 232 240)',
+                    },
+                }}
+            />
+            <MainLayout activeMenu={activeMenu} onMenuChange={setActiveMenu}>
+                {activeMenu === "chat" ? (
+                    <div className="max-w-3xl mx-auto h-[calc(100vh-6rem)]">
+                        <ChatInterface />
+                    </div>
+                ) : (
+                    <UploadContent />
+                )}
+            </MainLayout>
+        </>
     )
 }

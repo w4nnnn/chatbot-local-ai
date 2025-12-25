@@ -10,18 +10,21 @@ export type QueryIntent =
     | "superlative_query"    // ter-, paling (membutuhkan sort + limit)
     | "comparison_query"     // bandingkan A vs B
     | "aggregation_query"    // total, rata-rata, jumlah
+    | "budget_query"         // cari dengan batasan harga/budget
     | "filter_query"         // cari produk dengan kondisi
     | "simple_search"        // pencarian biasa
     | "general_chat";        // chitchat tanpa data
 
 export type SortOperator = "MIN" | "MAX";
+export type ComparisonOperator = "LTE" | "GTE" | "LT" | "GT" | "EQ"; // <=, >=, <, >, =
 export type AggregateOperator = "SUM" | "AVG" | "COUNT" | "MIN" | "MAX";
 
 export interface ExtractedQuery {
     intent: QueryIntent;
     entity?: string;              // Produk/kategori yang dicari
     attribute?: string;           // Kolom (harga, stok, terjual)
-    operator?: SortOperator | AggregateOperator;
+    operator?: SortOperator | ComparisonOperator | AggregateOperator;
+    value?: number;               // Nilai untuk budget/filter (misal: 7000000)
     limit?: number;
     confidence: number;           // 0-1, seberapa yakin dengan hasil
     rawQuery: string;
@@ -54,6 +57,69 @@ const GENERAL_CHAT_PATTERNS = [
     /\b(apa kabar|siapa (kamu|nama)|terima kasih|makasih)\b/i,
     /\b(tolong|bantu|cara|bagaimana|apa itu)\b/i,
 ];
+
+// Pattern untuk budget/range query
+const BUDGET_PATTERNS: { pattern: RegExp; operator: ComparisonOperator }[] = [
+    { pattern: /\b(ba?jet|budget|maksimal|max|maks|paling tinggi|di bawah|under|kurang dari|tidak lebih dari)\s*(rp?\.?\s*)?(\d+[\d.,]*)\s*(jt|juta|rb|ribu|k)?/i, operator: "LTE" },
+    { pattern: /\b(minimal|min|paling rendah|di atas|over|lebih dari|mulai dari)\s*(rp?\.?\s*)?(\d+[\d.,]*)\s*(jt|juta|rb|ribu|k)?/i, operator: "GTE" },
+];
+
+/**
+ * Parse nilai budget dari string (misal: "7juta" -> 7000000)
+ */
+function parseBudgetValue(numStr: string, unit?: string): number {
+    // Remove dots and commas used as thousands separator
+    const cleanNum = numStr.replace(/[.,]/g, "");
+    let value = parseFloat(cleanNum);
+
+    if (unit) {
+        const unitLower = unit.toLowerCase();
+        if (unitLower === "jt" || unitLower === "juta") {
+            value *= 1000000;
+        } else if (unitLower === "rb" || unitLower === "ribu" || unitLower === "k") {
+            value *= 1000;
+        }
+    }
+
+    return value;
+}
+
+/**
+ * Detect budget/range pattern in query
+ */
+function detectBudgetPattern(query: string): ExtractedQuery | null {
+    // Pattern untuk capture angka dan unit
+    const budgetRegex = /\b(ba?jet|budget|maksimal|max|maks|paling tinggi|di bawah|under|kurang dari|tidak lebih dari|minimal|min|paling rendah|di atas|over|lebih dari|mulai dari)\s*(rp?\.?\s*)?(\d+[\d.,]*)\s*(jt|juta|rb|ribu|k)?/i;
+
+    const match = query.match(budgetRegex);
+    if (!match) return null;
+
+    const keyword = match[1].toLowerCase();
+    const numStr = match[3];
+    const unit = match[4];
+
+    // Determine operator based on keyword
+    const lteKeywords = ["bajet", "bjet", "budget", "maksimal", "max", "maks", "paling tinggi", "di bawah", "under", "kurang dari", "tidak lebih dari"];
+    const operator: ComparisonOperator = lteKeywords.some(k => keyword.includes(k)) ? "LTE" : "GTE";
+
+    // Parse value
+    const value = parseBudgetValue(numStr, unit);
+
+    // Extract entity (produk yang dicari)
+    const cleanQuery = query.replace(budgetRegex, "").trim();
+    const entity = extractEntity(cleanQuery);
+
+    return {
+        intent: "budget_query",
+        entity: entity || undefined,
+        attribute: "harga",
+        operator,
+        value,
+        limit: 5, // Default tampilkan 5 opsi
+        confidence: 0.85,
+        rawQuery: query,
+    };
+}
 
 // ============================================
 // KEYWORD-BASED DETECTION (Fast)
@@ -113,7 +179,13 @@ function detectByKeyword(query: string): ExtractedQuery | null {
         }
     }
 
-    // 4. If contains product-related keywords, it's a search
+    // 4. Check budget/range patterns
+    const budgetResult = detectBudgetPattern(query);
+    if (budgetResult) {
+        return budgetResult;
+    }
+
+    // 5. If contains product-related keywords, it's a search
     if (/\b(produk|barang|item|cari|tampilkan|lihat|mana|apa)\b/i.test(query)) {
         return {
             intent: "simple_search",
@@ -128,15 +200,35 @@ function detectByKeyword(query: string): ExtractedQuery | null {
 }
 
 function extractEntity(query: string): string {
-    // Remove common words
+    // Remove punctuation
+    let cleanQuery = query.replace(/[.,!?;:'"]+/g, " ");
+
+    // Remove common words including budget-related terms
     const stopWords = [
-        "yang", "dengan", "dari", "untuk", "adalah", "ini", "itu",
-        "produk", "barang", "item", "cari", "tampilkan", "lihat",
-        "apa", "mana", "berapa", "kategori", "jenis",
+        // Common words
+        "yang", "dengan", "dari", "untuk", "adalah", "ini", "itu", "saya", "ingin", "mau", "cari",
+        "produk", "barang", "item", "tampilkan", "lihat", "tunjukkan", "kasih", "beri",
+        "apa", "mana", "berapa", "kategori", "jenis", "tipe",
+        // Budget-related words
+        "budget", "bajet", "bjet", "maksimal", "max", "maks", "minimal", "min",
+        "harga", "harganya", "kisaran", "sekitar", "kurang", "lebih",
+        "rupiah", "idr", "rp",
+        // Units
+        "juta", "jt", "ribu", "rb",
+        // Numbers (will be filtered by length check too)
+        "di", "ke", "atas", "bawah",
     ];
 
-    const words = query.toLowerCase().split(/\s+/);
-    const filtered = words.filter(w => !stopWords.includes(w) && w.length > 2);
+    const words = cleanQuery.toLowerCase().split(/\s+/);
+    const filtered = words.filter(w => {
+        // Skip stopwords
+        if (stopWords.includes(w)) return false;
+        // Skip very short words
+        if (w.length <= 2) return false;
+        // Skip numbers
+        if (/^\d+$/.test(w)) return false;
+        return true;
+    });
 
     return filtered.join(" ").trim();
 }
@@ -149,6 +241,7 @@ const LLM_EXTRACTION_PROMPT = `Kamu adalah sistem klasifikasi intent. Ekstrak in
 
 KATEGORI INTENT:
 - superlative_query: Pertanyaan dengan "ter-" atau "paling" (termurah, termahal, terbanyak, tersedikit)
+- budget_query: Pertanyaan dengan batasan harga/budget (bajet 5juta, maksimal 10jt, kurang dari 3juta)
 - aggregation_query: Pertanyaan perhitungan (total, rata-rata, jumlah, berapa banyak)
 - comparison_query: Membandingkan 2 atau lebih item
 - simple_search: Mencari produk/informasi biasa
@@ -157,12 +250,17 @@ KATEGORI INTENT:
 ATURAN:
 1. "entity" = nama produk atau kategori yang dicari (kosong jika semua produk)
 2. "attribute" = kolom data: "harga", "stok", atau lainnya
-3. "operator" = MIN (termurah/tersedikit) atau MAX (termahal/terbanyak) untuk superlative
-4. "limit" = jumlah yang diminta (default 1)
+3. "operator":
+   - Untuk superlative: MIN (termurah/tersedikit) atau MAX (termahal/terbanyak)
+   - Untuk budget_query: LTE (kurang/sama dengan) atau GTE (lebih/sama dengan)
+4. "value" = nilai budget dalam angka (misal: 7000000 untuk 7juta)
+5. "limit" = jumlah yang diminta (default 5 untuk budget_query, 1 untuk superlative)
 
 CONTOH:
 - "mie instant termurah" → {"intent":"superlative_query","entity":"mie instant","attribute":"harga","operator":"MIN","limit":1}
 - "5 laptop termahal" → {"intent":"superlative_query","entity":"laptop","attribute":"harga","operator":"MAX","limit":5}
+- "laptop dengan bajet 7juta" → {"intent":"budget_query","entity":"laptop","attribute":"harga","operator":"LTE","value":7000000,"limit":5}
+- "HP di atas 5juta" → {"intent":"budget_query","entity":"HP","attribute":"harga","operator":"GTE","value":5000000,"limit":5}
 - "berapa total stok" → {"intent":"aggregation_query","attribute":"stok","operator":"SUM"}
 - "cari beras premium" → {"intent":"simple_search","entity":"beras premium"}
 - "halo" → {"intent":"general_chat"}
@@ -202,7 +300,8 @@ async function detectByLLM(query: string): Promise<ExtractedQuery> {
             entity: parsed.entity || undefined,
             attribute: parsed.attribute || undefined,
             operator: parsed.operator || undefined,
-            limit: parsed.limit || 1,
+            value: parsed.value || undefined,
+            limit: parsed.limit || (parsed.intent === "budget_query" ? 5 : 1),
             confidence: 0.9,
             rawQuery: query,
         };

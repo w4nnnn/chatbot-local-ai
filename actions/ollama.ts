@@ -38,6 +38,21 @@ DATA YANG TERSEDIA (sudah diurutkan):
 
 Jawab pertanyaan dengan menyebutkan item yang sesuai kriteria "{operator} {attribute}".`;
 
+// System prompt untuk budget query
+const BUDGET_SYSTEM_PROMPT = `Kamu adalah asisten AI yang membantu menjawab pertanyaan berdasarkan DATA yang diberikan.
+
+INSTRUKSI KHUSUS:
+- User mencari produk dengan batasan harga {operator} {value}
+- Data yang diberikan sudah difilter sesuai budget
+- Tampilkan semua opsi yang tersedia dalam budget
+- Sebutkan nama produk dan harganya
+- Jika ada beberapa opsi, urutkan dari yang paling relevan
+
+DATA YANG TERSEDIA (sudah difilter sesuai budget):
+{context}
+
+Jawab dengan menyebutkan produk yang sesuai budget user.`;
+
 // System prompt untuk chat biasa (tanpa RAG)
 const NORMAL_SYSTEM_PROMPT = `Kamu adalah asisten AI yang ramah dan membantu. Jawab dengan bahasa Indonesia yang sopan dan jelas.`;
 
@@ -87,6 +102,28 @@ function sortSources(
 }
 
 /**
+ * Filter sources by budget constraint
+ */
+function filterByBudget(
+    sources: SourceDocument[],
+    attribute: string,
+    operator: "LTE" | "GTE" | "LT" | "GT" | "EQ",
+    value: number
+): SourceDocument[] {
+    return sources.filter(source => {
+        const sourceVal = Number(source.metadata[attribute]) || 0;
+        switch (operator) {
+            case "LTE": return sourceVal <= value;
+            case "GTE": return sourceVal >= value;
+            case "LT": return sourceVal < value;
+            case "GT": return sourceVal > value;
+            case "EQ": return sourceVal === value;
+            default: return true;
+        }
+    });
+}
+
+/**
  * Format context from sources
  */
 function formatContext(sources: SourceDocument[]): string {
@@ -102,6 +139,18 @@ function formatContext(sources: SourceDocument[]): string {
 }
 
 /**
+ * Format budget value for display (e.g., 7000000 -> "7 juta")
+ */
+function formatBudgetValue(value: number): string {
+    if (value >= 1000000) {
+        return `${(value / 1000000).toFixed(0)} juta`;
+    } else if (value >= 1000) {
+        return `${(value / 1000).toFixed(0)} ribu`;
+    }
+    return value.toString();
+}
+
+/**
  * Build system prompt based on intent
  */
 function buildSystemPrompt(intent: ExtractedQuery, context: string): string {
@@ -110,6 +159,14 @@ function buildSystemPrompt(intent: ExtractedQuery, context: string): string {
             .replace("{context}", context)
             .replace(/{operator}/g, intent.operator === "MIN" ? "terendah" : "tertinggi")
             .replace(/{attribute}/g, intent.attribute);
+    }
+
+    if (intent.intent === "budget_query" && intent.value) {
+        const opText = intent.operator === "LTE" ? "maksimal" : "minimal";
+        return BUDGET_SYSTEM_PROMPT
+            .replace("{context}", context)
+            .replace(/{operator}/g, opText)
+            .replace(/{value}/g, formatBudgetValue(intent.value));
     }
 
     return RAG_SYSTEM_PROMPT.replace("{context}", context);
@@ -157,10 +214,16 @@ export async function ragChat(
         // Detect intent using hybrid method
         const intentResult = await detectIntent(userMessage);
         console.log(`[RAG] Intent detected: ${intentResult.intent}`);
+        if (intentResult.value) {
+            console.log(`[RAG] Budget value: ${intentResult.value}`);
+        }
 
         // Search for relevant documents using HYBRID SEARCH
         const searchQuery = intentResult.entity || userMessage;
-        const searchLimit = intentResult.intent === "superlative_query" ? 10 : 5;
+        // For budget query, search more to filter later
+        const searchLimit = intentResult.intent === "budget_query" ? 20
+            : intentResult.intent === "superlative_query" ? 10
+                : 5;
 
         // Gunakan hybridSearch untuk toleransi typo
         const searchResult = await hybridSearch(searchQuery, searchLimit);
@@ -177,7 +240,7 @@ export async function ragChat(
                 metadata: r.metadata,
             }));
 
-            // Sort if superlative query
+            // Handle superlative query (sort)
             if (
                 intentResult.intent === "superlative_query" &&
                 intentResult.attribute &&
@@ -192,6 +255,31 @@ export async function ragChat(
                 // Limit results
                 sources = sources.slice(0, intentResult.limit || 1);
                 console.log(`[RAG] Sorted by ${intentResult.attribute} ${intentResult.operator}, limit ${intentResult.limit}`);
+            }
+
+            // Handle budget query (filter)
+            if (
+                intentResult.intent === "budget_query" &&
+                intentResult.attribute &&
+                intentResult.operator &&
+                intentResult.value
+            ) {
+                const beforeFilter = sources.length;
+
+                // Filter by budget constraint
+                sources = filterByBudget(
+                    sources,
+                    intentResult.attribute,
+                    intentResult.operator as "LTE" | "GTE" | "LT" | "GT" | "EQ",
+                    intentResult.value
+                );
+
+                // Keep sorted by relevance (original order from search)
+                // Sources are already sorted by relevance score from hybrid search
+
+                // Limit results
+                sources = sources.slice(0, intentResult.limit || 5);
+                console.log(`[RAG] Filtered by budget: ${beforeFilter} -> ${sources.length} results (sorted by relevance)`);
             }
 
             // Build context

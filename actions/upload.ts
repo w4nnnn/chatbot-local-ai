@@ -13,6 +13,7 @@ export type ParsedData = {
     rowCount: number;
     filename: string;
     fileType: string;
+    sheetName?: string; // Tambah info sheet yang dipilih
 };
 
 export type UploadResult = {
@@ -29,10 +30,82 @@ export type SaveResult = {
     error?: string;
 };
 
+// Type untuk info sheet Excel
+export type SheetInfo = {
+    name: string;
+    rowCount: number;
+    columnCount: number;
+};
+
+export type SheetsResult = {
+    success: boolean;
+    sheets: SheetInfo[];
+    filename: string;
+    fileType: string;
+    error?: string;
+};
+
+/**
+ * Ambil daftar sheet dari file Excel
+ */
+export async function getExcelSheets(formData: FormData): Promise<SheetsResult> {
+    try {
+        const file = formData.get("file") as File;
+
+        if (!file) {
+            return { success: false, sheets: [], filename: "", fileType: "", error: "NO_FILE" };
+        }
+
+        const filename = file.name;
+        const extension = filename.split(".").pop()?.toLowerCase();
+
+        if (!extension || !["xlsx", "xls"].includes(extension)) {
+            return {
+                success: false,
+                sheets: [],
+                filename,
+                fileType: extension || "",
+                error: "NOT_EXCEL_FILE",
+            };
+        }
+
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const workbook = XLSX.read(buffer, { type: "buffer" });
+
+        const sheets: SheetInfo[] = workbook.SheetNames.map((name) => {
+            const sheet = workbook.Sheets[name];
+            const range = XLSX.utils.decode_range(sheet["!ref"] || "A1");
+            return {
+                name,
+                rowCount: range.e.r - range.s.r + 1,
+                columnCount: range.e.c - range.s.c + 1,
+            };
+        });
+
+        return {
+            success: true,
+            sheets,
+            filename,
+            fileType: extension,
+        };
+    } catch (error) {
+        console.error("Error getting sheets:", error);
+        return {
+            success: false,
+            sheets: [],
+            filename: "",
+            fileType: "",
+            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        };
+    }
+}
+
 /**
  * Parse file Excel/CSV dan kembalikan data untuk preview
+ * @param formData - FormData dengan file
+ * @param sheetName - (Optional) Nama sheet untuk file Excel
  */
-export async function parseFile(formData: FormData): Promise<UploadResult> {
+export async function parseFile(formData: FormData, sheetName?: string): Promise<UploadResult> {
     try {
         const file = formData.get("file") as File;
 
@@ -54,6 +127,7 @@ export async function parseFile(formData: FormData): Promise<UploadResult> {
         const buffer = Buffer.from(await file.arrayBuffer());
         let headers: string[] = [];
         let rows: Record<string, unknown>[] = [];
+        let selectedSheetName: string | undefined;
 
         if (extension === "csv") {
             // Parse CSV dengan PapaParse
@@ -69,8 +143,19 @@ export async function parseFile(formData: FormData): Promise<UploadResult> {
         } else {
             // Parse Excel dengan xlsx
             const workbook = XLSX.read(buffer, { type: "buffer" });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
+
+            // Gunakan sheet yang dipilih atau default ke sheet pertama
+            selectedSheetName = sheetName || workbook.SheetNames[0];
+
+            if (!workbook.SheetNames.includes(selectedSheetName)) {
+                return {
+                    success: false,
+                    message: `Sheet "${selectedSheetName}" tidak ditemukan`,
+                    error: "SHEET_NOT_FOUND",
+                };
+            }
+
+            const sheet = workbook.Sheets[selectedSheetName];
 
             // Konversi ke JSON
             const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
@@ -84,13 +169,14 @@ export async function parseFile(formData: FormData): Promise<UploadResult> {
 
         return {
             success: true,
-            message: `Berhasil memparse ${rows.length} baris data`,
+            message: `Berhasil memparse ${rows.length} baris data${selectedSheetName ? ` dari sheet "${selectedSheetName}"` : ""}`,
             data: {
                 headers,
                 rows,
                 rowCount: rows.length,
                 filename,
                 fileType: extension,
+                sheetName: selectedSheetName,
             },
         };
     } catch (error) {
