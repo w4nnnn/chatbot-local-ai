@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Bot, User, Loader2, Sparkles, Target } from "lucide-react";
+import { Bot, User, Loader2, Zap } from "lucide-react";
 import { CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { SourcesPanel } from "./sources-panel";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 import type { ChatMessage } from "./types";
 
 interface ChatMessagesProps {
@@ -27,14 +28,14 @@ export function ChatMessages({ messages, isLoading, useRAG, scrollRef }: ChatMes
                             className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : "flex-row"
                                 }`}
                         >
-                            <Avatar className={`w-8 h-8 border ${message.role === "user"
-                                ? "bg-blue-600 border-blue-500"
-                                : "bg-slate-800 border-slate-700"
+                            <Avatar className={`w-8 h-8 border-2 shadow-md ${message.role === "user"
+                                ? "bg-primary border-primary/30"
+                                : "bg-white border-primary/20"
                                 }`}>
                                 <AvatarFallback className={
                                     message.role === "user"
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-slate-800 text-slate-400"
+                                        ? "bg-primary text-white"
+                                        : "bg-white text-primary"
                                 }>
                                     {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                                 </AvatarFallback>
@@ -43,40 +44,29 @@ export function ChatMessages({ messages, isLoading, useRAG, scrollRef }: ChatMes
                             <div className={`flex flex-col max-w-[80%] ${message.role === "user" ? "items-end" : "items-start"
                                 }`}>
                                 <div
-                                    className={`relative px-4 py-2 rounded-2xl text-sm shadow-sm ${message.role === "user"
-                                        ? "bg-blue-600 text-white rounded-tr-sm"
-                                        : "bg-slate-800 text-slate-200 border border-slate-700 rounded-tl-sm"
+                                    className={`relative px-4 py-3 rounded-2xl shadow-md ${message.role === "user"
+                                        ? "bg-primary text-white rounded-tr-sm shadow-primary/20"
+                                        : "bg-white text-gray-700 border border-primary/10 rounded-tl-sm shadow-primary/5"
                                         }`}
                                 >
-                                    {message.content}
+                                    {message.role === "assistant" ? (
+                                        <MarkdownRenderer content={message.content} />
+                                    ) : (
+                                        <span className="text-sm">{message.content}</span>
+                                    )}
                                 </div>
 
-                                {/* RAG Badge & Sources */}
+                                {/* Response Time & Sources */}
                                 {message.role === "assistant" && message.isRAGUsed && (
                                     <div className="mt-1">
                                         <div className="flex flex-wrap gap-1 mb-1">
-                                            <Badge
-                                                variant="outline"
-                                                className="text-[10px] border-purple-500/50 text-purple-400"
-                                            >
-                                                <Sparkles className="h-2 w-2 mr-1" />
-                                                RAG
-                                            </Badge>
-                                            {message.intent && (
+                                            {message.responseTime !== undefined && (
                                                 <Badge
                                                     variant="outline"
-                                                    className="text-[10px] border-blue-500/50 text-blue-400"
+                                                    className="text-[10px] border-primary/20 text-primary bg-primary/5"
                                                 >
-                                                    <Target className="h-2 w-2 mr-1" />
-                                                    {message.intent.intent.replace("_", " ")}
-                                                </Badge>
-                                            )}
-                                            {message.intent?.attribute && (
-                                                <Badge
-                                                    variant="outline"
-                                                    className="text-[10px] border-green-500/50 text-green-400"
-                                                >
-                                                    {message.intent.operator === "MIN" ? "⬇️" : message.intent.operator === "MAX" ? "⬆️" : "📊"} {message.intent.attribute}
+                                                    <Zap className="h-2 w-2 mr-1" />
+                                                    {message.responseTime.toFixed(1)}s
                                                 </Badge>
                                             )}
                                         </div>
@@ -87,7 +77,7 @@ export function ChatMessages({ messages, isLoading, useRAG, scrollRef }: ChatMes
                         </div>
                     ))}
                     {isLoading && (
-                        <div className="flex gap-3 items-center text-slate-500 text-sm pl-1">
+                        <div className="flex gap-3 items-center text-primary text-sm pl-1">
                             <div className="w-8 h-8 flex items-center justify-center">
                                 <Loader2 className="w-4 h-4 animate-spin" />
                             </div>

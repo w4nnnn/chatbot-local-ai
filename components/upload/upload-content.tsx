@@ -333,16 +333,6 @@ export function UploadContent() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="text-center space-y-2">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">
-                    Upload Data
-                </h1>
-                <p className="text-slate-400">
-                    Upload file Excel atau CSV untuk disimpan ke database
-                </p>
-            </div>
-
             {/* Upload Dropzone */}
             <UploadDropzone
                 isLoading={isLoading}

@@ -15,20 +15,20 @@ interface ChatInputProps {
 
 export function ChatInput({ input, isLoading, useRAG, onInputChange, onSubmit }: ChatInputProps) {
     return (
-        <CardFooter className="pt-4 border-t border-slate-800 bg-slate-900/50">
-            <form onSubmit={onSubmit} className="flex w-full gap-2 items-center">
+        <CardFooter className="pt-4 border-t border-primary/10">
+            <form onSubmit={onSubmit} className="flex w-full gap-3 items-center">
                 <Input
                     placeholder={useRAG ? "Tanyakan tentang data Anda..." : "Ketik pesan anda..."}
                     value={input}
                     onChange={(e) => onInputChange(e.target.value)}
                     disabled={isLoading}
-                    className="flex-1 bg-slate-800 border-slate-700 text-slate-200 placeholder:text-slate-500"
+                    className="flex-1 bg-white border-primary/20 text-gray-700 placeholder:text-gray-400 focus:border-primary focus:ring-primary/20 shadow-sm"
                 />
                 <Button
                     type="submit"
                     size="icon"
                     disabled={isLoading || !input.trim()}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all duration-200"
                 >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     <span className="sr-only">Kirim</span>

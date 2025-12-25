@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileUp, Loader2 } from "lucide-react";
-import { getFileTypeColor } from "./types";
 
 interface UploadDropzoneProps {
     isLoading: boolean;
@@ -33,13 +32,13 @@ export function UploadDropzone({
     }
 
     return (
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
+        <Card className="border-primary/20 bg-white/70 backdrop-blur-xl shadow-xl shadow-primary/5">
             <CardHeader>
-                <CardTitle className="text-slate-200 flex items-center gap-2">
-                    <FileUp className="h-5 w-5" />
+                <CardTitle className="text-gray-800 flex items-center gap-2">
+                    <FileUp className="h-5 w-5 text-primary" />
                     Upload File
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-500">
                     Drag & drop file atau klik untuk memilih. Format yang didukung: CSV, XLSX, XLS
                 </CardDescription>
             </CardHeader>
@@ -48,8 +47,8 @@ export function UploadDropzone({
                     className={`
                         relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300
                         ${isDragging
-                            ? "border-blue-500 bg-blue-500/10"
-                            : "border-slate-700 hover:border-slate-600 hover:bg-slate-800/50"
+                            ? "border-primary bg-primary/5"
+                            : "border-primary/30 hover:border-primary hover:bg-primary/5"
                         }
                         ${isLoading ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     `}
@@ -68,26 +67,26 @@ export function UploadDropzone({
 
                     {isLoading ? (
                         <div className="flex flex-col items-center gap-4">
-                            <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
-                            <p className="text-slate-400">Memproses file...</p>
+                            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                            <p className="text-gray-500">Memproses file...</p>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-4">
-                            <div className="p-4 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20">
-                                <Upload className="h-10 w-10 text-blue-400" />
+                            <div className="p-4 rounded-full bg-primary shadow-lg shadow-primary/30">
+                                <Upload className="h-10 w-10 text-white" />
                             </div>
                             <div>
-                                <p className="text-lg text-slate-300">
+                                <p className="text-lg text-gray-700 font-medium">
                                     Drag & drop file di sini
                                 </p>
-                                <p className="text-sm text-slate-500">
+                                <p className="text-sm text-gray-400">
                                     atau klik untuk memilih file
                                 </p>
                             </div>
                             <div className="flex gap-2">
-                                <Badge variant="outline" className={getFileTypeColor("csv")}>CSV</Badge>
-                                <Badge variant="outline" className={getFileTypeColor("xlsx")}>XLSX</Badge>
-                                <Badge variant="outline" className={getFileTypeColor("xls")}>XLS</Badge>
+                                <Badge variant="outline" className="border-emerald-200 text-emerald-600 bg-emerald-50">CSV</Badge>
+                                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">XLSX</Badge>
+                                <Badge variant="outline" className="border-primary/20 text-primary/80 bg-primary/5">XLS</Badge>
                             </div>
                         </div>
                     )}

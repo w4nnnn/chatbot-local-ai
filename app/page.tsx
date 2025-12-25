@@ -12,13 +12,14 @@ export default function HomePage() {
     return (
         <>
             <Toaster
-                theme="dark"
+                theme="light"
                 position="top-center"
                 toastOptions={{
                     style: {
-                        background: 'rgb(30 41 59)',
-                        border: '1px solid rgb(51 65 85)',
-                        color: 'rgb(226 232 240)',
+                        background: 'white',
+                        border: '1px solid rgb(221 214 254)',
+                        color: 'rgb(55 48 163)',
+                        boxShadow: '0 10px 25px -5px rgb(139 92 246 / 0.1)',
                     },
                 }}
             />

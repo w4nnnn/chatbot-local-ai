@@ -2,6 +2,7 @@
 
 import { MessageSquare, Upload, Bot, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeSelector } from "@/components/theme-selector";
 import { cn } from "@/lib/utils";
 
 export type MenuType = "chat" | "upload";
@@ -39,7 +40,7 @@ export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarP
             <Button
                 variant="ghost"
                 size="icon"
-                className="fixed top-4 left-4 z-50 md:hidden bg-slate-900/80 backdrop-blur border border-slate-800"
+                className="fixed top-4 left-4 z-50 md:hidden bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg hover:bg-gray-50 text-gray-700"
                 onClick={onToggle}
             >
                 {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -48,7 +49,7 @@ export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarP
             {/* Overlay for mobile */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 md:hidden"
                     onClick={onToggle}
                 />
             )}
@@ -56,23 +57,23 @@ export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarP
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed left-0 top-0 h-full w-64 bg-slate-950 border-r border-slate-800 z-40 transition-transform duration-300",
+                    "fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-xl border-r border-gray-200 z-40 transition-transform duration-300 shadow-xl",
                     "md:translate-x-0",
                     isOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
                 <div className="flex flex-col h-full">
                     {/* Brand */}
-                    <div className="p-6 border-b border-slate-800">
+                    <div className="p-6 border-b border-gray-100">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl">
-                                <Bot className="h-6 w-6 text-blue-400" />
+                            <div className="p-2.5 bg-primary rounded-xl shadow-lg">
+                                <Bot className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text">
+                                <h1 className="text-lg font-bold text-gray-800">
                                     Local AI Chat
                                 </h1>
-                                <p className="text-xs text-slate-500">Powered by Ollama</p>
+                                <p className="text-xs text-gray-400">Powered by Ollama</p>
                             </div>
                         </div>
                     </div>
@@ -93,12 +94,12 @@ export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarP
                                     className={cn(
                                         "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
                                         isActive
-                                            ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-l-2 border-blue-500 text-white"
-                                            : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                                            ? "bg-primary text-white shadow-lg"
+                                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
                                     )}
                                 >
                                     <span className={cn(
-                                        isActive ? "text-blue-400" : "text-slate-500"
+                                        isActive ? "text-white" : "text-gray-400"
                                     )}>
                                         {item.icon}
                                     </span>
@@ -106,11 +107,17 @@ export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarP
                                 </button>
                             );
                         })}
+
+                        {/* Separator */}
+                        <div className="pt-4 mt-4 border-t border-gray-100">
+                            <p className="text-xs text-gray-400 px-4 mb-2">Pengaturan</p>
+                            <ThemeSelector />
+                        </div>
                     </nav>
 
                     {/* Footer */}
-                    <div className="p-4 border-t border-slate-800">
-                        <p className="text-xs text-slate-600 text-center">
+                    <div className="p-4 border-t border-gray-100">
+                        <p className="text-xs text-gray-300 text-center">
                             © 2024 Local AI Chatbot
                         </p>
                     </div>

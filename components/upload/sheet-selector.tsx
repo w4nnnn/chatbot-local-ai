@@ -27,19 +27,19 @@ export function SheetSelector({
     onCancel,
 }: SheetSelectorProps) {
     return (
-        <Card className="border-purple-800/50 bg-purple-950/30 backdrop-blur">
+        <Card className="border-primary/30 bg-primary/5 backdrop-blur-xl shadow-xl shadow-primary/5">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-slate-200 flex items-center gap-2">
-                            <Layers className="h-5 w-5 text-purple-400" />
+                        <CardTitle className="text-gray-800 flex items-center gap-2">
+                            <Layers className="h-5 w-5 text-primary" />
                             Pilih Sheet
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-gray-500">
                             File Excel memiliki {availableSheets.length} sheet. Pilih satu atau lebih sheet untuk diupload.
                         </CardDescription>
                     </div>
-                    <Badge variant="outline" className="border-purple-500/50 text-purple-400">
+                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10">
                         {selectedSheets.length} / {availableSheets.length} dipilih
                     </Badge>
                 </div>
@@ -47,12 +47,12 @@ export function SheetSelector({
             <CardContent className="space-y-4">
                 {/* Select All Button */}
                 <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-400">Sheet yang tersedia:</p>
+                    <p className="text-sm text-gray-500">Sheet yang tersedia:</p>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={onToggleAll}
-                        className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+                        className="text-primary hover:text-primary/80 hover:bg-primary/10"
                     >
                         {selectedSheets.length === availableSheets.length ? "Batalkan Semua" : "Pilih Semua"}
                     </Button>
@@ -67,34 +67,32 @@ export function SheetSelector({
                                 key={sheet.name}
                                 onClick={() => onToggleSheet(sheet.name)}
                                 className={`
-                                    flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all
+                                    flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all
                                     ${isSelected
-                                        ? 'bg-purple-500/20 border border-purple-500/50'
-                                        : 'bg-slate-800/50 border border-slate-700 hover:border-slate-600'}
-                                `}
+                                        ? 'bg-primary/10 border border-primary/30'
+                                        : 'bg-white border border-gray-200 hover:border-primary/20'}`}
                             >
                                 <div className="flex items-center gap-3">
                                     {/* Checkbox */}
                                     <div className={`
                                         w-5 h-5 rounded border-2 flex items-center justify-center transition-all
                                         ${isSelected
-                                            ? 'bg-purple-500 border-purple-500'
-                                            : 'border-slate-500 hover:border-slate-400'}
-                                    `}>
+                                            ? 'bg-primary border-primary'
+                                            : 'border-gray-300 hover:border-primary/50'}`}>
                                         {isSelected && (
                                             <CheckCircle2 className="h-3 w-3 text-white" />
                                         )}
                                     </div>
-                                    <FileSpreadsheet className={`h-5 w-5 ${isSelected ? 'text-purple-400' : 'text-slate-500'}`} />
-                                    <span className={`font-medium ${isSelected ? 'text-purple-300' : 'text-slate-300'}`}>
+                                    <FileSpreadsheet className={`h-5 w-5 ${isSelected ? 'text-primary' : 'text-gray-400'}`} />
+                                    <span className={`font-medium ${isSelected ? 'text-primary' : 'text-gray-700'}`}>
                                         {sheet.name}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className="bg-slate-700/50 text-slate-400 border-slate-600">
+                                    <Badge variant="outline" className="bg-white text-gray-500 border-gray-200">
                                         {sheet.rowCount} baris
                                     </Badge>
-                                    <Badge variant="outline" className="bg-slate-700/50 text-slate-400 border-slate-600">
+                                    <Badge variant="outline" className="bg-white text-gray-500 border-gray-200">
                                         {sheet.columnCount} kolom
                                     </Badge>
                                 </div>
@@ -105,11 +103,11 @@ export function SheetSelector({
 
                 {/* Selected sheets summary */}
                 {selectedSheets.length > 0 && (
-                    <div className="bg-slate-800/50 rounded-lg p-3">
-                        <p className="text-sm text-slate-400 mb-2">Sheet yang akan diupload:</p>
+                    <div className="bg-white rounded-xl p-3 border border-primary/10">
+                        <p className="text-sm text-gray-500 mb-2">Sheet yang akan diupload:</p>
                         <div className="flex flex-wrap gap-2">
                             {selectedSheets.map(name => (
-                                <Badge key={name} className="bg-purple-500/20 text-purple-300 border-purple-500/50">
+                                <Badge key={name} className="bg-primary/10 text-primary border-primary/20">
                                     <FileSpreadsheet className="h-3 w-3 mr-1" />
                                     {name}
                                 </Badge>
@@ -118,20 +116,20 @@ export function SheetSelector({
                     </div>
                 )}
 
-                <Separator className="bg-slate-700" />
+                <Separator className="bg-primary/10" />
 
                 <div className="flex gap-2 justify-end">
                     <Button
                         variant="outline"
                         onClick={onCancel}
-                        className="border-slate-700 hover:bg-slate-800"
+                        className="border-gray-200 text-gray-600 hover:bg-gray-50"
                     >
                         Batal
                     </Button>
                     <Button
                         onClick={onConfirm}
                         disabled={selectedSheets.length === 0 || isLoading}
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30"
                     >
                         {isLoading ? (
                             <>

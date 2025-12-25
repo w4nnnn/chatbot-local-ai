@@ -6,6 +6,7 @@ export interface ChatMessage extends Message {
     sources?: SourceDocument[];
     isRAGUsed?: boolean;
     intent?: ExtractedQuery;
+    responseTime?: number; // dalam detik
 }
 
 // Re-export types dari actions untuk kemudahan import

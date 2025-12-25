@@ -30,20 +30,20 @@ export function DataPreview({
     onSaveAndEmbed,
 }: DataPreviewProps) {
     return (
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur">
+        <Card className="border-primary/20 bg-white/70 backdrop-blur-xl shadow-xl shadow-primary/5">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-slate-200 flex items-center gap-2">
-                            <Eye className="h-5 w-5" />
+                        <CardTitle className="text-gray-800 flex items-center gap-2">
+                            <Eye className="h-5 w-5 text-primary" />
                             Preview Data
                         </CardTitle>
-                        <CardDescription className="mt-1">
-                            <span className="text-blue-400">{data.filename}</span>
+                        <CardDescription className="mt-1 text-gray-500">
+                            <span className="text-primary font-medium">{data.filename}</span>
                             {data.sheetName && (
                                 <>
                                     {" • "}
-                                    <span className="text-purple-400">Sheet: {data.sheetName}</span>
+                                    <span className="text-primary/70">Sheet: {data.sheetName}</span>
                                 </>
                             )}
                             {" • "}
@@ -54,7 +54,7 @@ export function DataPreview({
                     </div>
                     <div className="flex items-center gap-2">
                         {data.sheetName && (
-                            <Badge variant="outline" className="border-purple-500/50 text-purple-400">
+                            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
                                 <Layers className="h-3 w-3 mr-1" />
                                 {data.sheetName}
                             </Badge>
@@ -68,26 +68,26 @@ export function DataPreview({
             <CardContent className="space-y-4">
                 {/* Headers Info */}
                 <div>
-                    <p className="text-sm text-slate-400 mb-2">Kolom:</p>
+                    <p className="text-sm text-gray-500 mb-2">Kolom:</p>
                     <div className="flex flex-wrap gap-2">
                         {data.headers.map((header, idx) => (
-                            <Badge key={idx} variant="secondary" className="bg-slate-800 text-slate-300">
+                            <Badge key={idx} variant="secondary" className="bg-primary/5 text-primary border border-primary/20">
                                 {header}
                             </Badge>
                         ))}
                     </div>
                 </div>
 
-                <Separator className="bg-slate-800" />
+                <Separator className="bg-primary/10" />
 
                 {/* Data Table */}
-                <ScrollArea className="h-[400px] rounded-lg border border-slate-800">
+                <ScrollArea className="h-[400px] rounded-lg border border-primary/10">
                     <Table>
-                        <TableHeader className="sticky top-0 bg-slate-900">
-                            <TableRow className="border-slate-800 hover:bg-slate-800/50">
-                                <TableHead className="text-slate-400 w-16">#</TableHead>
+                        <TableHeader className="sticky top-0 bg-primary/5 backdrop-blur">
+                            <TableRow className="border-primary/10 hover:bg-primary/5">
+                                <TableHead className="text-primary w-16">#</TableHead>
                                 {data.headers.map((header, idx) => (
-                                    <TableHead key={idx} className="text-slate-400 whitespace-nowrap">
+                                    <TableHead key={idx} className="text-primary whitespace-nowrap font-medium">
                                         {header}
                                     </TableHead>
                                 ))}
@@ -95,12 +95,12 @@ export function DataPreview({
                         </TableHeader>
                         <TableBody>
                             {data.rows.slice(0, previewLimit).map((row, rowIdx) => (
-                                <TableRow key={rowIdx} className="border-slate-800 hover:bg-slate-800/30">
-                                    <TableCell className="text-slate-500 font-mono text-xs">
+                                <TableRow key={rowIdx} className="border-primary/10 hover:bg-primary/5">
+                                    <TableCell className="text-gray-400 font-mono text-xs">
                                         {rowIdx + 1}
                                     </TableCell>
                                     {data.headers.map((header, colIdx) => (
-                                        <TableCell key={colIdx} className="text-slate-300 whitespace-nowrap">
+                                        <TableCell key={colIdx} className="text-gray-700 whitespace-nowrap">
                                             {String(row[header] ?? "")}
                                         </TableCell>
                                     ))}
@@ -118,7 +118,7 @@ export function DataPreview({
                             variant="ghost"
                             size="sm"
                             onClick={onShowMore}
-                            className="text-slate-400 hover:text-slate-200"
+                            className="text-primary hover:text-primary/80 hover:bg-primary/5"
                         >
                             Tampilkan lebih banyak ({data.rows.length - previewLimit} tersisa)
                         </Button>
@@ -130,7 +130,7 @@ export function DataPreview({
                     <SaveProgressIndicator progress={saveProgress} />
                 )}
 
-                <Separator className="bg-slate-800" />
+                <Separator className="bg-primary/10" />
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3">
@@ -138,7 +138,7 @@ export function DataPreview({
                         variant="outline"
                         onClick={onCancel}
                         disabled={isSaving}
-                        className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                        className="border-gray-200 text-gray-600 hover:bg-gray-50"
                     >
                         <XCircle className="h-4 w-4 mr-2" />
                         Batal
@@ -146,7 +146,7 @@ export function DataPreview({
                     <Button
                         onClick={onSaveAndEmbed}
                         disabled={isSaving || saveProgress.step === 'done'}
-                        className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700"
+                        className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30"
                     >
                         {isSaving ? (
                             <>
@@ -174,31 +174,31 @@ export function DataPreview({
 // Sub-component for progress indicator
 function SaveProgressIndicator({ progress }: { progress: SaveProgress }) {
     return (
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+        <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
             <div className="space-y-3">
                 {/* Step 1: Saving */}
                 <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${progress.step === 'saving'
-                        ? 'bg-blue-500/20 border-2 border-blue-500'
+                        ? 'bg-blue-100 border-2 border-blue-500'
                         : ['embedding', 'done'].includes(progress.step)
-                            ? 'bg-green-500/20 border-2 border-green-500'
+                            ? 'bg-emerald-100 border-2 border-emerald-500'
                             : progress.step === 'error'
-                                ? 'bg-red-500/20 border-2 border-red-500'
-                                : 'bg-slate-700 border-2 border-slate-600'
+                                ? 'bg-red-100 border-2 border-red-500'
+                                : 'bg-gray-100 border-2 border-gray-300'
                         }`}>
                         {progress.step === 'saving' ? (
-                            <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
+                            <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
                         ) : ['embedding', 'done'].includes(progress.step) ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-400" />
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                         ) : progress.step === 'error' ? (
-                            <XCircle className="h-4 w-4 text-red-400" />
+                            <XCircle className="h-4 w-4 text-red-600" />
                         ) : (
-                            <span className="text-slate-400 text-sm">1</span>
+                            <span className="text-gray-500 text-sm">1</span>
                         )}
                     </div>
-                    <span className={`text-sm ${progress.step === 'saving' ? 'text-blue-400'
-                        : ['embedding', 'done'].includes(progress.step) ? 'text-green-400'
-                            : 'text-slate-400'
+                    <span className={`text-sm ${progress.step === 'saving' ? 'text-blue-600 font-medium'
+                        : ['embedding', 'done'].includes(progress.step) ? 'text-emerald-600'
+                            : 'text-gray-500'
                         }`}>
                         Menyimpan ke Database
                     </span>
@@ -207,30 +207,30 @@ function SaveProgressIndicator({ progress }: { progress: SaveProgress }) {
                 {/* Step 2: Embedding */}
                 <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${progress.step === 'embedding'
-                        ? 'bg-purple-500/20 border-2 border-purple-500'
+                        ? 'bg-primary/20 border-2 border-primary'
                         : progress.step === 'done'
-                            ? 'bg-green-500/20 border-2 border-green-500'
+                            ? 'bg-emerald-100 border-2 border-emerald-500'
                             : progress.step === 'error' && progress.message.includes('embed')
-                                ? 'bg-red-500/20 border-2 border-red-500'
-                                : 'bg-slate-700 border-2 border-slate-600'
+                                ? 'bg-red-100 border-2 border-red-500'
+                                : 'bg-gray-100 border-2 border-gray-300'
                         }`}>
                         {progress.step === 'embedding' ? (
-                            <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+                            <Loader2 className="h-4 w-4 text-primary animate-spin" />
                         ) : progress.step === 'done' ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-400" />
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                         ) : (
-                            <span className="text-slate-400 text-sm">2</span>
+                            <span className="text-gray-500 text-sm">2</span>
                         )}
                     </div>
                     <div className="flex-1">
-                        <span className={`text-sm ${progress.step === 'embedding' ? 'text-purple-400'
-                            : progress.step === 'done' ? 'text-green-400'
-                                : 'text-slate-400'
+                        <span className={`text-sm ${progress.step === 'embedding' ? 'text-primary font-medium'
+                            : progress.step === 'done' ? 'text-emerald-600'
+                                : 'text-gray-500'
                             }`}>
                             {progress.step === 'done' ? (
                                 <>
                                     Embedding Selesai
-                                    <span className="block text-xs text-slate-500 mt-0.5">
+                                    <span className="block text-xs text-gray-400 mt-0.5">
                                         Kolom teks: {progress.textColumns?.join(', ')}
                                     </span>
                                 </>
@@ -243,10 +243,10 @@ function SaveProgressIndicator({ progress }: { progress: SaveProgress }) {
 
                 {/* Progress Message */}
                 <div className={`text-sm mt-2 p-2 rounded ${progress.step === 'done'
-                    ? 'bg-green-500/10 text-green-400'
+                    ? 'bg-emerald-100 text-emerald-700'
                     : progress.step === 'error'
-                        ? 'bg-red-500/10 text-red-400'
-                        : 'bg-slate-700/50 text-slate-300'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-white text-gray-600 border border-gray-100'
                     }`}>
                     {progress.step === 'done' && <CheckCircle2 className="inline h-4 w-4 mr-2" />}
                     {progress.step === 'error' && <XCircle className="inline h-4 w-4 mr-2" />}

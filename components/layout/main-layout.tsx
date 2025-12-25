@@ -13,7 +13,7 @@ export function MainLayout({ children, activeMenu, onMenuChange }: MainLayoutPro
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50">
             <Sidebar
                 activeMenu={activeMenu}
                 onMenuChange={onMenuChange}

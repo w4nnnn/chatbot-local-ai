@@ -79,6 +79,7 @@ export interface RAGResponse {
     sources: SourceDocument[];
     isRAGUsed: boolean;
     intent?: ExtractedQuery;
+    responseTime?: number; // dalam detik
     error?: string;
 }
 
@@ -181,9 +182,10 @@ function buildSystemPrompt(intent: ExtractedQuery, context: string): string {
  */
 export async function ragChat(
     userMessage: string,
-    conversationHistory: Message[] = [],
     useRAG: boolean = true
 ): Promise<RAGResponse> {
+    const startTime = performance.now();
+
     try {
         let context = "";
         let sources: SourceDocument[] = [];
@@ -194,7 +196,6 @@ export async function ragChat(
             // Skip RAG for general chat
             const messages: Message[] = [
                 { role: "system", content: NORMAL_SYSTEM_PROMPT },
-                ...conversationHistory.filter((m) => m.role !== "system"),
                 { role: "user", content: userMessage },
             ];
 
@@ -203,11 +204,14 @@ export async function ragChat(
                 messages: messages,
             });
 
+            const responseTime = (performance.now() - startTime) / 1000;
+
             return {
                 success: true,
                 message: response.message.content,
                 sources: [],
                 isRAGUsed: false,
+                responseTime,
             };
         }
 
@@ -220,6 +224,8 @@ export async function ragChat(
 
         // Search for relevant documents using HYBRID SEARCH
         const searchQuery = intentResult.entity || userMessage;
+        console.log(`[RAG] Search query: "${searchQuery}" (entity: "${intentResult.entity || 'none'}")`);
+
         // For budget query, search more to filter later
         const searchLimit = intentResult.intent === "budget_query" ? 20
             : intentResult.intent === "superlative_query" ? 10
@@ -294,7 +300,6 @@ export async function ragChat(
         // Build messages
         const messages: Message[] = [
             { role: "system", content: systemPrompt },
-            ...conversationHistory.filter((m) => m.role !== "system"),
             { role: "user", content: userMessage },
         ];
 
@@ -304,12 +309,15 @@ export async function ragChat(
             messages: messages,
         });
 
+        const responseTime = (performance.now() - startTime) / 1000;
+
         return {
             success: true,
             message: response.message.content,
             sources: sources,
             isRAGUsed: isRAGUsed,
             intent: intentResult,
+            responseTime,
         };
     } catch (error) {
         console.error("[RAG] Error:", error);

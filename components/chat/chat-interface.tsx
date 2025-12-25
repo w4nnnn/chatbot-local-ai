@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ragChat, hasEmbeddedData, type Message } from "@/actions/ollama";
+import { ragChat, hasEmbeddedData } from "@/actions/ollama";
 import { Card } from "@/components/ui/card";
 import { ChatHeader } from "./chat-header";
 import { ChatMessages } from "./chat-messages";
@@ -17,9 +17,11 @@ export function ChatInterface() {
     const [messages, setMessages] = React.useState<ChatMessage[]>([INITIAL_MESSAGE]);
     const [input, setInput] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
-    const [useRAG, setUseRAG] = React.useState(true);
     const [hasData, setHasData] = React.useState(false);
     const scrollRef = React.useRef<HTMLDivElement>(null);
+
+    // RAG selalu aktif
+    const useRAG = true;
 
     // Check apakah ada data yang sudah di-embed
     React.useEffect(() => {
@@ -47,20 +49,15 @@ export function ChatInterface() {
         setIsLoading(true);
 
         try {
-            // Ambil history percakapan (tanpa sources)
-            const history: Message[] = messages.map(m => ({
-                role: m.role,
-                content: m.content
-            }));
-
-            const response = await ragChat(input, history, useRAG);
+            const response = await ragChat(input, useRAG);
 
             const assistantMessage: ChatMessage = {
                 role: "assistant",
                 content: response.message,
                 sources: response.sources,
                 isRAGUsed: response.isRAGUsed,
-                intent: response.intent
+                intent: response.intent,
+                responseTime: response.responseTime
             };
 
             setMessages((prev) => [...prev, assistantMessage]);
@@ -77,12 +74,8 @@ export function ChatInterface() {
     };
 
     return (
-        <Card className="w-full h-full flex flex-col shadow-lg border-slate-800 bg-slate-900/50 backdrop-blur">
-            <ChatHeader
-                useRAG={useRAG}
-                onRAGChange={setUseRAG}
-                hasData={hasData}
-            />
+        <Card className="w-full h-full flex flex-col shadow-2xl shadow-primary/10 border-primary/20 bg-white/70 backdrop-blur-xl">
+            <ChatHeader hasData={hasData} />
             <ChatMessages
                 messages={messages}
                 isLoading={isLoading}
