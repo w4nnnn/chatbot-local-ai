@@ -1,5 +1,6 @@
 "use server";
 
+import Fuse from "fuse.js";
 import { getLanceDB, VECTOR_TABLE_NAME } from "@/lib/lancedb";
 import {
     generateEmbeddings,
@@ -218,25 +219,205 @@ export async function searchSimilar(
     }
 }
 
+// Type untuk hasil search
+export type SearchResult = {
+    id: string;
+    text: string;
+    score: number;
+    metadata: Record<string, unknown>;
+    source: 'vector' | 'fuzzy' | 'hybrid';
+};
+
 /**
- * Hapus embeddings untuk file tertentu
+ * Hybrid Search - Kombinasi Vector Search + Fuzzy Search
+ * Lebih toleran terhadap typo dan variasi penulisan
  */
-export async function deleteFileEmbeddings(fileId: number): Promise<{
+export async function hybridSearch(
+    query: string,
+    limit: number = 5,
+    fileId?: number
+): Promise<{
     success: boolean;
-    message: string;
+    results: SearchResult[];
+    error?: string;
 }> {
     try {
+        console.log(`[Hybrid Search] Query: "${query}"`);
+
         const lanceDb = await getLanceDB();
         const tableNames = await lanceDb.tableNames();
 
         if (!tableNames.includes(VECTOR_TABLE_NAME)) {
-            return { success: true, message: "Tidak ada data embedding" };
+            return {
+                success: false,
+                results: [],
+                error: "Belum ada data yang di-embed",
+            };
         }
 
         const table = await lanceDb.openTable(VECTOR_TABLE_NAME);
+
+        // 1. VECTOR SEARCH (Semantic)
+        const { generateEmbedding } = await import("@/lib/lancedb/embeddings");
+        const queryVector = await generateEmbedding(query);
+
+        let vectorQuery = table.vectorSearch(queryVector).limit(limit * 2);
+        if (fileId !== undefined) {
+            vectorQuery = vectorQuery.where(`file_id = ${fileId}`);
+        }
+
+        const vectorResults = await vectorQuery.toArray();
+        console.log(`[Hybrid Search] Vector results: ${vectorResults.length}`);
+
+        // 2. FUZZY SEARCH (Keyword + Typo tolerance)
+        // Ambil semua data untuk fuzzy search
+        let allDataQuery = table.query().limit(500);
+        if (fileId !== undefined) {
+            allDataQuery = allDataQuery.where(`file_id = ${fileId}`);
+        }
+        const allData = await allDataQuery.toArray();
+
+        // Konversi ke format yang bisa di-search
+        const searchableData = allData.map((row) => {
+            const metadata = JSON.parse(row.metadata as string);
+            return {
+                id: row.id as string,
+                text: row.text as string,
+                metadata,
+                // Gabungkan text dari semua field untuk fuzzy search
+                searchText: Object.values(metadata)
+                    .filter(v => typeof v === 'string')
+                    .join(' '),
+            };
+        });
+
+        // Setup Fuse.js dengan konfigurasi fuzzy
+        const fuse = new Fuse(searchableData, {
+            keys: [
+                { name: 'text', weight: 0.4 },
+                { name: 'searchText', weight: 0.4 },
+                { name: 'metadata.nama_produk', weight: 0.2 },
+            ],
+            threshold: 0.4,     // 0 = exact match, 1 = match anything
+            distance: 100,      // toleransi jarak karakter
+            includeScore: true,
+            minMatchCharLength: 2,
+        });
+
+        const fuzzyResults = fuse.search(query).slice(0, limit * 2);
+        console.log(`[Hybrid Search] Fuzzy results: ${fuzzyResults.length}`);
+
+        // 3. COMBINE & DEDUPLICATE
+        const combined = new Map<string, SearchResult & { hybridScore: number }>();
+
+        // Vector results dengan weight 0.6
+        vectorResults.forEach((r, index) => {
+            const id = r.id as string;
+            const distance = r._distance as number;
+            const vectorScore = (1 - distance) * 0.6;
+            const positionBonus = (1 - index / (limit * 2)) * 0.1;
+
+            combined.set(id, {
+                id,
+                text: r.text as string,
+                score: distance,
+                metadata: JSON.parse(r.metadata as string),
+                source: 'vector',
+                hybridScore: vectorScore + positionBonus,
+            });
+        });
+
+        // Fuzzy results dengan weight 0.4
+        fuzzyResults.forEach((r, index) => {
+            const id = r.item.id;
+            const fuzzyScore = (1 - (r.score || 0)) * 0.4;
+            const positionBonus = (1 - index / (limit * 2)) * 0.1;
+
+            const existing = combined.get(id);
+            if (existing) {
+                // Boost score jika ditemukan di kedua search
+                existing.hybridScore += fuzzyScore + positionBonus + 0.1;
+                existing.source = 'hybrid';
+                console.log(`[Hybrid Search] Boosted: ${id} (found in both)`);
+            } else {
+                combined.set(id, {
+                    id,
+                    text: r.item.text,
+                    score: r.score || 0,
+                    metadata: r.item.metadata,
+                    source: 'fuzzy',
+                    hybridScore: fuzzyScore + positionBonus,
+                });
+            }
+        });
+
+        // 4. SORT & LIMIT
+        const sortedResults = Array.from(combined.values())
+            .sort((a, b) => b.hybridScore - a.hybridScore)
+            .slice(0, limit)
+            .map(({ hybridScore, ...rest }) => ({
+                ...rest,
+                score: 1 - hybridScore, // Konversi kembali ke distance-like score
+            }));
+
+        console.log(`[Hybrid Search] Final results: ${sortedResults.length}`);
+        sortedResults.forEach((r, i) => {
+            const name = r.metadata.nama_produk || r.text.substring(0, 30);
+            console.log(`  ${i + 1}. [${r.source}] ${name}`);
+        });
+
+        return {
+            success: true,
+            results: sortedResults,
+        };
+    } catch (error) {
+        console.error("[Hybrid Search] Error:", error);
+        return {
+            success: false,
+            results: [],
+            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        };
+    }
+}
+
+export async function deleteFileEmbeddings(fileId: number): Promise<{
+    success: boolean;
+    message: string;
+    deletedCount?: number;
+}> {
+    try {
+        console.log(`[Delete Embeddings] Menghapus embeddings untuk file_id: ${fileId}`);
+
+        const lanceDb = await getLanceDB();
+        const tableNames = await lanceDb.tableNames();
+
+        if (!tableNames.includes(VECTOR_TABLE_NAME)) {
+            console.log("[Delete Embeddings] Tabel tidak ditemukan, tidak ada yang dihapus");
+            return { success: true, message: "Tidak ada data embedding", deletedCount: 0 };
+        }
+
+        const table = await lanceDb.openTable(VECTOR_TABLE_NAME);
+
+        // Hitung jumlah data sebelum delete
+        const beforeCount = await table.countRows();
+        console.log(`[Delete Embeddings] Total rows sebelum delete: ${beforeCount}`);
+
+        // Hapus data dengan filter file_id
+        // LanceDB menggunakan SQL-like filter syntax
         await table.delete(`file_id = ${fileId}`);
 
-        return { success: true, message: "Embeddings berhasil dihapus" };
+        // Hitung jumlah data setelah delete
+        const afterCount = await table.countRows();
+        console.log(`[Delete Embeddings] Total rows setelah delete: ${afterCount}`);
+
+        const deletedCount = beforeCount - afterCount;
+        console.log(`[Delete Embeddings] Berhasil menghapus ${deletedCount} embeddings`);
+
+        return {
+            success: true,
+            message: `Berhasil menghapus ${deletedCount} embeddings`,
+            deletedCount
+        };
     } catch (error) {
         console.error("[Delete Embeddings] Error:", error);
         return {

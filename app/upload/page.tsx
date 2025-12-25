@@ -188,16 +188,33 @@ export default function UploadPage() {
     }
 
     async function handleDelete(id: number) {
-        // Hapus embeddings terlebih dahulu
-        await deleteFileEmbeddings(id);
+        try {
+            // Hapus embeddings terlebih dahulu
+            const embedResult = await deleteFileEmbeddings(id);
+            console.log("[Delete] Embedding result:", embedResult);
 
-        // Lalu hapus file dari SQLite
-        const result = await deleteFile(id);
-        if (result.success) {
-            toast.success(result.message);
-            await loadUploadedFiles();
-        } else {
-            toast.error(result.message);
+            if (!embedResult.success) {
+                console.warn("[Delete] Warning saat hapus embedding:", embedResult.message);
+            }
+
+            // Lalu hapus file dari SQLite
+            const result = await deleteFile(id);
+            if (result.success) {
+                const deletedCount = embedResult.deletedCount ?? 0;
+                if (embedResult.success && deletedCount > 0) {
+                    toast.success(`Data dan ${deletedCount} embeddings berhasil dihapus`);
+                } else if (embedResult.success) {
+                    toast.success("Data berhasil dihapus");
+                } else {
+                    toast.success("Data berhasil dihapus (embeddings mungkin sudah tidak ada)");
+                }
+                await loadUploadedFiles();
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            console.error("[Delete] Error:", error);
+            toast.error("Gagal menghapus data");
         }
     }
 
