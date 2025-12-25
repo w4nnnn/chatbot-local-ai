@@ -5,6 +5,7 @@ export type UploadedFileInfo = {
     id: number;
     originalName: string;
     fileType: string;
+    sheetName?: string | null;
     rowCount: number;
     headers: string[];
     createdAt: Date;

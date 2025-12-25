@@ -7,8 +7,8 @@ import { toast } from "sonner";
 
 import {
     UploadDropzone,
-    SheetSelector,
-    DataPreview,
+    SheetSelectorDialog,
+    DataPreviewDialog,
     FilesList,
     type ParsedData,
     type SheetInfo,
@@ -31,6 +31,7 @@ export function UploadContent() {
     const [selectedSheets, setSelectedSheets] = useState<string[]>([]);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
     const [showSheetSelector, setShowSheetSelector] = useState(false);
+    const [activePreviewSheet, setActivePreviewSheet] = useState<string>('');
 
     // Load uploaded files on mount
     useEffect(() => {
@@ -98,28 +99,26 @@ export function UploadContent() {
         await parseAndPreview(file);
     }
 
-    async function parseAndPreview(file: File, sheetNames?: string[]) {
+    async function parseAndPreview(file: File, sheetNames?: string[], activeSheet?: string) {
         setIsLoading(true);
 
         const formData = new FormData();
         formData.append("file", file);
 
-        const firstSheet = sheetNames?.[0];
-        const result = await parseFile(formData, firstSheet);
+        const sheetToPreview = activeSheet || sheetNames?.[0];
+        const result = await parseFile(formData, sheetToPreview);
 
         if (result.success && result.data) {
-            const dataWithSheetInfo = {
-                ...result.data,
-                sheetName: sheetNames && sheetNames.length > 1
-                    ? `${sheetNames.length} sheets (${sheetNames.join(', ')})`
-                    : result.data.sheetName
-            };
-            setParsedData(dataWithSheetInfo);
+            setParsedData(result.data);
+            setActivePreviewSheet(sheetToPreview || '');
 
-            if (sheetNames && sheetNames.length > 1) {
-                toast.success(`Preview sheet "${firstSheet}". Total ${sheetNames.length} sheet akan diupload.`);
-            } else {
-                toast.success(result.message);
+            if (!activeSheet) {
+                // Hanya tampilkan toast saat pertama kali, bukan saat ganti sheet
+                if (sheetNames && sheetNames.length > 1) {
+                    toast.success(`Preview sheet "${sheetToPreview}". Total ${sheetNames.length} sheet akan diupload.`);
+                } else {
+                    toast.success(result.message);
+                }
             }
         } else {
             toast.error(result.message);
@@ -127,6 +126,13 @@ export function UploadContent() {
 
         setIsLoading(false);
         setShowSheetSelector(false);
+    }
+
+    async function handleChangePreviewSheet(sheetName: string) {
+        if (pendingFile && sheetName !== activePreviewSheet) {
+            setPreviewLimit(10); // Reset preview limit
+            await parseAndPreview(pendingFile, selectedSheets, sheetName);
+        }
     }
 
     // ============================================
@@ -343,29 +349,38 @@ export function UploadContent() {
                 onDrop={handleDrop}
             />
 
-            {/* Sheet Selector */}
-            {showSheetSelector && availableSheets.length > 0 && (
-                <SheetSelector
-                    availableSheets={availableSheets}
-                    selectedSheets={selectedSheets}
-                    isLoading={isLoading}
-                    onToggleSheet={toggleSheetSelection}
-                    onToggleAll={toggleSelectAll}
-                    onConfirm={handleSheetConfirm}
-                    onCancel={handleSheetCancel}
-                />
-            )}
+            {/* Sheet Selector Dialog */}
+            <SheetSelectorDialog
+                open={showSheetSelector && availableSheets.length > 0}
+                onOpenChange={(open) => {
+                    if (!open) handleSheetCancel();
+                }}
+                availableSheets={availableSheets}
+                selectedSheets={selectedSheets}
+                isLoading={isLoading}
+                onToggleSheet={toggleSheetSelection}
+                onToggleAll={toggleSelectAll}
+                onConfirm={handleSheetConfirm}
+            />
 
-            {/* Data Preview */}
+            {/* Data Preview Dialog */}
             {parsedData && (
-                <DataPreview
+                <DataPreviewDialog
+                    open={true}
+                    onOpenChange={(open) => {
+                        if (!open) handleCancel();
+                    }}
                     data={parsedData}
                     previewLimit={previewLimit}
                     saveProgress={saveProgress}
                     isSaving={isSaving}
+                    isLoading={isLoading}
                     onShowMore={() => setPreviewLimit((prev) => prev + 50)}
-                    onCancel={handleCancel}
                     onSaveAndEmbed={handleSaveAndEmbed}
+                    // Sheet tabs props
+                    selectedSheets={selectedSheets}
+                    activeSheet={activePreviewSheet}
+                    onChangeSheet={handleChangePreviewSheet}
                 />
             )}
 

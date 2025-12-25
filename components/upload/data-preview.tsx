@@ -1,142 +1,177 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Eye, Loader2, CheckCircle2, XCircle, Sparkles, Layers } from "lucide-react";
+import { Eye, Loader2, CheckCircle2, XCircle, Sparkles, FileSpreadsheet } from "lucide-react";
 import type { ParsedData, SaveProgress } from "./types";
 import { getFileTypeColor } from "./types";
+import { cn } from "@/lib/utils";
 
-interface DataPreviewProps {
+interface DataPreviewDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     data: ParsedData;
     previewLimit: number;
     saveProgress: SaveProgress;
     isSaving: boolean;
+    isLoading?: boolean;
     onShowMore: () => void;
-    onCancel: () => void;
     onSaveAndEmbed: () => void;
+    // Sheet tabs props
+    selectedSheets?: string[];
+    activeSheet?: string;
+    onChangeSheet?: (sheetName: string) => void;
 }
 
-export function DataPreview({
+export function DataPreviewDialog({
+    open,
+    onOpenChange,
     data,
     previewLimit,
     saveProgress,
     isSaving,
+    isLoading,
     onShowMore,
-    onCancel,
     onSaveAndEmbed,
-}: DataPreviewProps) {
+    selectedSheets = [],
+    activeSheet,
+    onChangeSheet,
+}: DataPreviewDialogProps) {
+    const hasMultipleSheets = selectedSheets.length > 1;
+
     return (
-        <Card className="border-primary/20 bg-white/70 backdrop-blur-xl shadow-xl shadow-primary/5">
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-gray-800 flex items-center gap-2">
-                            <Eye className="h-5 w-5 text-primary" />
-                            Preview Data
-                        </CardTitle>
-                        <CardDescription className="mt-1 text-gray-500">
-                            <span className="text-primary font-medium">{data.filename}</span>
-                            {data.sheetName && (
-                                <>
-                                    {" • "}
-                                    <span className="text-primary/70">Sheet: {data.sheetName}</span>
-                                </>
-                            )}
-                            {" • "}
-                            <span>{data.rowCount} baris</span>
-                            {" • "}
-                            <span>{data.headers.length} kolom</span>
-                        </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {data.sheetName && (
-                            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
-                                <Layers className="h-3 w-3 mr-1" />
-                                {data.sheetName}
-                            </Badge>
-                        )}
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Eye className="h-5 w-5 text-primary" />
+                        Preview Data
+                    </DialogTitle>
+                    <DialogDescription className="flex items-center gap-2 flex-wrap">
+                        <span className="text-primary font-medium">{data.filename}</span>
+                        <span>•</span>
+                        <span>{data.rowCount} baris</span>
+                        <span>•</span>
+                        <span>{data.headers.length} kolom</span>
                         <Badge variant="outline" className={getFileTypeColor(data.fileType)}>
                             {data.fileType.toUpperCase()}
                         </Badge>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {/* Headers Info */}
-                <div>
-                    <p className="text-sm text-gray-500 mb-2">Kolom:</p>
-                    <div className="flex flex-wrap gap-2">
-                        {data.headers.map((header, idx) => (
-                            <Badge key={idx} variant="secondary" className="bg-primary/5 text-primary border border-primary/20">
-                                {header}
+                        {hasMultipleSheets && (
+                            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
+                                {selectedSheets.length} sheets dipilih
                             </Badge>
-                        ))}
+                        )}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="flex-1 overflow-hidden space-y-4">
+                    {/* Sheet Tabs */}
+                    {hasMultipleSheets && (
+                        <div className="flex flex-wrap gap-2">
+                            {selectedSheets.map((sheet) => (
+                                <Button
+                                    key={sheet}
+                                    variant={activeSheet === sheet ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => onChangeSheet?.(sheet)}
+                                    disabled={isLoading}
+                                    className={cn(
+                                        "gap-2",
+                                        activeSheet === sheet
+                                            ? "bg-primary text-white"
+                                            : "border-primary/30 text-primary hover:bg-primary/10"
+                                    )}
+                                >
+                                    <FileSpreadsheet className="h-3 w-3" />
+                                    {sheet}
+                                    {isLoading && activeSheet === sheet && (
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                    )}
+                                </Button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Headers Info */}
+                    <div>
+                        <p className="text-sm text-gray-500 mb-2">Kolom:</p>
+                        <div className="flex flex-wrap gap-2">
+                            {data.headers.map((header, idx) => (
+                                <Badge key={idx} variant="secondary" className="bg-primary/5 text-primary border border-primary/20">
+                                    {header}
+                                </Badge>
+                            ))}
+                        </div>
                     </div>
-                </div>
 
-                <Separator className="bg-primary/10" />
+                    <Separator className="bg-primary/10" />
 
-                {/* Data Table */}
-                <ScrollArea className="h-[400px] rounded-lg border border-primary/10">
-                    <Table>
-                        <TableHeader className="sticky top-0 bg-primary/5 backdrop-blur">
-                            <TableRow className="border-primary/10 hover:bg-primary/5">
-                                <TableHead className="text-primary w-16">#</TableHead>
-                                {data.headers.map((header, idx) => (
-                                    <TableHead key={idx} className="text-primary whitespace-nowrap font-medium">
-                                        {header}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.rows.slice(0, previewLimit).map((row, rowIdx) => (
-                                <TableRow key={rowIdx} className="border-primary/10 hover:bg-primary/5">
-                                    <TableCell className="text-gray-400 font-mono text-xs">
-                                        {rowIdx + 1}
-                                    </TableCell>
-                                    {data.headers.map((header, colIdx) => (
-                                        <TableCell key={colIdx} className="text-gray-700 whitespace-nowrap">
-                                            {String(row[header] ?? "")}
-                                        </TableCell>
+                    {/* Data Table */}
+                    <ScrollArea className="h-[300px] rounded-lg border border-primary/10">
+                        <Table>
+                            <TableHeader className="sticky top-0 bg-primary/5 backdrop-blur">
+                                <TableRow className="border-primary/10 hover:bg-primary/5">
+                                    <TableHead className="text-primary w-16">#</TableHead>
+                                    {data.headers.map((header, idx) => (
+                                        <TableHead key={idx} className="text-primary whitespace-nowrap font-medium">
+                                            {header}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                            </TableHeader>
+                            <TableBody>
+                                {data.rows.slice(0, previewLimit).map((row, rowIdx) => (
+                                    <TableRow key={rowIdx} className="border-primary/10 hover:bg-primary/5">
+                                        <TableCell className="text-gray-400 font-mono text-xs">
+                                            {rowIdx + 1}
+                                        </TableCell>
+                                        {data.headers.map((header, colIdx) => (
+                                            <TableCell key={colIdx} className="text-gray-700 whitespace-nowrap">
+                                                {String(row[header] ?? "")}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                        <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
 
-                {/* Show More */}
-                {data.rows.length > previewLimit && (
-                    <div className="text-center">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onShowMore}
-                            className="text-primary hover:text-primary/80 hover:bg-primary/5"
-                        >
-                            Tampilkan lebih banyak ({data.rows.length - previewLimit} tersisa)
-                        </Button>
-                    </div>
-                )}
+                    {/* Show More */}
+                    {data.rows.length > previewLimit && (
+                        <div className="text-center">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onShowMore}
+                                className="text-primary hover:text-primary/80 hover:bg-primary/5"
+                            >
+                                Tampilkan lebih banyak ({data.rows.length - previewLimit} tersisa)
+                            </Button>
+                        </div>
+                    )}
 
-                {/* Progress Indicator */}
-                {saveProgress.step !== 'idle' && (
-                    <SaveProgressIndicator progress={saveProgress} />
-                )}
+                    {/* Progress Indicator */}
+                    {saveProgress.step !== 'idle' && (
+                        <SaveProgressIndicator progress={saveProgress} />
+                    )}
+                </div>
 
-                <Separator className="bg-primary/10" />
-
-                {/* Actions */}
-                <div className="flex justify-end gap-3">
+                <DialogFooter>
                     <Button
                         variant="outline"
-                        onClick={onCancel}
+                        onClick={() => onOpenChange(false)}
                         disabled={isSaving}
                         className="border-gray-200 text-gray-600 hover:bg-gray-50"
                     >
@@ -161,13 +196,13 @@ export function DataPreview({
                         ) : (
                             <>
                                 <Sparkles className="h-4 w-4 mr-2" />
-                                Simpan & Embed
+                                Simpan
                             </>
                         )}
                     </Button>
-                </div>
-            </CardContent>
-        </Card>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
 

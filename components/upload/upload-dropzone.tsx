@@ -28,6 +28,8 @@ export function UploadDropzone({
         const file = e.target.files?.[0];
         if (file) {
             onFileSelect(file);
+            // Reset input value agar bisa upload file yang sama lagi
+            e.target.value = '';
         }
     }
 

@@ -14,9 +14,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { FileSpreadsheet, Trash2 } from "lucide-react";
+import { FileSpreadsheet, Trash2, Eye } from "lucide-react";
 import type { UploadedFileInfo } from "./types";
 import { getFileTypeColor } from "./types";
+import { FilePreviewDialog } from "./file-preview-dialog";
 
 interface FilesListProps {
     files: UploadedFileInfo[];
@@ -62,7 +63,12 @@ function FileItem({ file, onDelete }: { file: UploadedFileInfo; onDelete: (id: n
                     <FileSpreadsheet className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                    <p className="font-medium text-gray-800">{file.originalName}</p>
+                    <p className="font-medium text-gray-800">
+                        {file.originalName}
+                        {file.sheetName && (
+                            <span className="text-primary/70 font-normal"> ({file.sheetName})</span>
+                        )}
+                    </p>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                         <Badge variant="outline" className={`${getFileTypeColor(file.fileType)} text-xs`}>
                             {file.fileType.toUpperCase()}
@@ -84,6 +90,20 @@ function FileItem({ file, onDelete }: { file: UploadedFileInfo; onDelete: (id: n
                 </div>
             </div>
             <div className="flex items-center gap-2">
+                {/* Preview Button */}
+                <FilePreviewDialog
+                    file={file}
+                    trigger={
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                        >
+                            <Eye className="h-4 w-4" />
+                        </Button>
+                    }
+                />
+
                 {/* Delete Button */}
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -122,3 +142,4 @@ function FileItem({ file, onDelete }: { file: UploadedFileInfo; onDelete: (id: n
         </div>
     );
 }
+
