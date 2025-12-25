@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { settings, COLOR_THEMES, type ColorTheme } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 const THEME_KEY = "color_theme";
 const DEFAULT_THEME: ColorTheme = "violet";
@@ -62,9 +63,13 @@ export async function updateColorTheme(theme: ColorTheme): Promise<{ success: bo
             });
         }
 
+        // Revalidate to ensure fresh data on next request
+        revalidatePath("/");
+
         return { success: true, message: `Tema berhasil diubah ke ${theme}` };
     } catch (error) {
         console.error("[updateColorTheme] Error:", error);
         return { success: false, message: "Gagal mengubah tema" };
     }
 }
+
