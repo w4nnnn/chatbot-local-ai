@@ -35,7 +35,8 @@
 | **Frontend** | React 19, Tailwind CSS 4, Radix UI |
 | **Database** | SQLite (better-sqlite3) + Drizzle ORM |
 | **Vector Store** | LanceDB |
-| **LLM** | Ollama (qwen2.5:3b) |
+| **LLM (Chat)** | Ollama (qwen3:1.7b) |
+| **LLM (Intent)** | Ollama (qwen2.5:3b) |
 | **Embeddings** | Ollama (nomic-embed-text) |
 | **Parser File** | xlsx, papaparse |
 
@@ -54,8 +55,9 @@ Sebelum memulai, pastikan Anda telah menginstal:
    - Download dari [ollama.com](https://ollama.com/)
    - Pull model yang diperlukan:
    ```bash
-   ollama pull qwen2.5:3b
-   ollama pull nomic-embed-text
+   ollama pull qwen3:1.7b        # Untuk respons chat
+   ollama pull qwen2.5:3b        # Untuk deteksi intent
+   ollama pull nomic-embed-text  # Untuk embeddings
    ```
 
 ---
@@ -138,7 +140,7 @@ chatbot-local-ai/
 ├─────────────────────────────────────────────────────────────┤
 │                    Ollama (AI Lokal)                         │
 │  ┌─────────────────────────────────────────────────────────┐│
-│  │  qwen2.5:3b (Chat & Intent)  │  nomic-embed-text (Emb) ││
+│  │ qwen3:1.7b (Chat) │ qwen2.5:3b (Intent) │ nomic (Emb)  ││
 │  └─────────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────┘
 ```
