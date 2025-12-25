@@ -7,29 +7,29 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Ollama](https://img.shields.io/badge/Ollama-Local_AI-green)](https://ollama.ai/)
 
-**A smart local AI chatbot with RAG (Retrieval Augmented Generation) capabilities**
+**Chatbot AI lokal yang cerdas dengan kemampuan RAG (Retrieval Augmented Generation)**
 
-[🇮🇩 Bahasa Indonesia](./README.id.md)
+[🇺🇸 English](./README.md)
 
 </div>
 
 ---
 
-## ✨ Features
+## ✨ Fitur
 
-- 🧠 **RAG Chatbot** - Intelligent responses based on your uploaded data
-- 🎯 **Intent Detection** - Smart query classification using LLM
-- 🔍 **Hybrid Search** - Combination of vector search + fuzzy search for typo tolerance
-- 📊 **Data Upload** - Support for CSV, XLSX, and XLS files
-- 🎨 **Multi-theme** - 5 beautiful color themes (Violet, Blue, Emerald, Rose, Amber)
-- ⚡ **Response Time** - Display response time for each message
-- 🔒 **100% Local** - All data and AI processing stays on your machine
+- 🧠 **RAG Chatbot** - Jawaban cerdas berdasarkan data yang diupload
+- 🎯 **Deteksi Intent** - Klasifikasi query menggunakan LLM
+- 🔍 **Hybrid Search** - Kombinasi vector search + fuzzy search untuk toleransi typo
+- 📊 **Upload Data** - Mendukung file CSV, XLSX, dan XLS
+- 🎨 **Multi-tema** - 5 tema warna cantik (Violet, Blue, Emerald, Rose, Amber)
+- ⚡ **Waktu Respons** - Menampilkan waktu respons untuk setiap pesan
+- 🔒 **100% Lokal** - Semua data dan pemrosesan AI tetap di komputer Anda
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Teknologi
 
-| Category | Technology |
+| Kategori | Teknologi |
 |----------|-----------|
 | **Framework** | Next.js 16.1.1 (App Router) |
 | **Frontend** | React 19, Tailwind CSS 4, Radix UI |
@@ -37,22 +37,22 @@
 | **Vector Store** | LanceDB |
 | **LLM** | Ollama (qwen2.5:3b) |
 | **Embeddings** | Ollama (nomic-embed-text) |
-| **File Parser** | xlsx, papaparse |
+| **Parser File** | xlsx, papaparse |
 
 ---
 
-## 📋 Prerequisites
+## 📋 Prasyarat
 
-Before you begin, ensure you have the following installed:
+Sebelum memulai, pastikan Anda telah menginstal:
 
-1. **Node.js** (v18 or higher)
+1. **Node.js** (v18 atau lebih tinggi)
    ```bash
    node --version
    ```
 
-2. **Ollama** - Local AI runtime
-   - Download from [ollama.com](https://ollama.com/)
-   - Pull required models:
+2. **Ollama** - Runtime AI lokal
+   - Download dari [ollama.com](https://ollama.com/)
+   - Pull model yang diperlukan:
    ```bash
    ollama pull qwen2.5:3b
    ollama pull nomic-embed-text
@@ -60,9 +60,9 @@ Before you begin, ensure you have the following installed:
 
 ---
 
-## 🚀 Installation
+## 🚀 Instalasi
 
-1. **Clone the repository**
+1. **Clone repository**
    ```bash
    git clone https://github.com/yourusername/chatbot-local-ai.git
    cd chatbot-local-ai
@@ -73,57 +73,57 @@ Before you begin, ensure you have the following installed:
    npm install
    ```
 
-3. **Initialize database**
+3. **Inisialisasi database**
    ```bash
    npx drizzle-kit push
    ```
 
-4. **Start development server**
+4. **Jalankan development server**
    ```bash
    npm run dev
    ```
 
-5. **Open in browser**
+5. **Buka di browser**
    ```
    http://localhost:3000
    ```
 
 ---
 
-## 📁 Project Structure
+## 📁 Struktur Project
 
 ```
 chatbot-local-ai/
 ├── actions/              # Server Actions
-│   ├── ollama.ts        # RAG Chat & LLM integration
-│   ├── intent.ts        # Intent detection using LLM
+│   ├── ollama.ts        # RAG Chat & integrasi LLM
+│   ├── intent.ts        # Deteksi intent menggunakan LLM
 │   ├── embed.ts         # Embedding & hybrid search
-│   ├── upload.ts        # File upload & parsing
-│   └── settings.ts      # App settings management
+│   ├── upload.ts        # Upload & parsing file
+│   └── settings.ts      # Manajemen pengaturan
 ├── app/                  # Next.js App Router
-│   ├── layout.tsx       # Root layout with theme provider
-│   ├── page.tsx         # Main page component
-│   └── globals.css      # Global styles & CSS variables
-├── components/           # React Components
-│   ├── chat/            # Chat interface components
-│   ├── upload/          # File upload components
-│   ├── layout/          # Layout components (sidebar)
-│   └── ui/              # shadcn/ui components
-├── lib/                  # Utility libraries
-│   ├── db/              # Drizzle ORM setup & schema
-│   └── lancedb/         # LanceDB vector store
-└── data/                 # Database files (SQLite, LanceDB)
+│   ├── layout.tsx       # Layout root dengan theme provider
+│   ├── page.tsx         # Komponen halaman utama
+│   └── globals.css      # Style global & CSS variables
+├── components/           # Komponen React
+│   ├── chat/            # Komponen antarmuka chat
+│   ├── upload/          # Komponen upload file
+│   ├── layout/          # Komponen layout (sidebar)
+│   └── ui/              # Komponen shadcn/ui
+├── lib/                  # Library utilitas
+│   ├── db/              # Setup & schema Drizzle ORM
+│   └── lancedb/         # Vector store LanceDB
+└── data/                 # File database (SQLite, LanceDB)
 ```
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Arsitektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      User Interface                          │
+│                    Antarmuka Pengguna                        │
 │  ┌─────────────────────┐    ┌──────────────────────────┐    │
-│  │   Chat Interface    │    │    Upload Interface      │    │
+│  │   Antarmuka Chat    │    │   Antarmuka Upload       │    │
 │  └─────────────────────┘    └──────────────────────────┘    │
 ├─────────────────────────────────────────────────────────────┤
 │                     Server Actions                           │
@@ -131,12 +131,12 @@ chatbot-local-ai/
 │  │ ollama   │ │  intent  │ │ embed  │ │ upload │ │settings│ │
 │  └──────────┘ └──────────┘ └────────┘ └────────┘ └───────┘ │
 ├─────────────────────────────────────────────────────────────┤
-│                      Data Layer                              │
+│                      Lapisan Data                            │
 │  ┌────────────────────┐    ┌─────────────────────────────┐  │
 │  │   SQLite (Drizzle) │    │    LanceDB (Vector Store)   │  │
 │  └────────────────────┘    └─────────────────────────────┘  │
 ├─────────────────────────────────────────────────────────────┤
-│                    Ollama (Local AI)                         │
+│                    Ollama (AI Lokal)                         │
 │  ┌─────────────────────────────────────────────────────────┐│
 │  │  qwen2.5:3b (Chat & Intent)  │  nomic-embed-text (Emb) ││
 │  └─────────────────────────────────────────────────────────┘│
@@ -145,64 +145,64 @@ chatbot-local-ai/
 
 ---
 
-## 📖 Usage
+## 📖 Penggunaan
 
 ### Upload Data
-1. Click **"Upload"** in the sidebar
-2. Drag & drop or select a file (CSV, XLSX, XLS)
-3. For Excel files with multiple sheets, select which sheets to upload
-4. Click **"Simpan"** to save and embed the data
+1. Klik **"Upload"** di sidebar
+2. Drag & drop atau pilih file (CSV, XLSX, XLS)
+3. Untuk file Excel dengan banyak sheet, pilih sheet yang ingin diupload
+4. Klik **"Simpan"** untuk menyimpan dan embed data
 
-### Chat with Your Data
-1. Click **"Chat"** in the sidebar
-2. Ask questions about your uploaded data
-3. The chatbot will use RAG to find relevant information
+### Chat dengan Data Anda
+1. Klik **"Chat"** di sidebar
+2. Ajukan pertanyaan tentang data yang diupload
+3. Chatbot akan menggunakan RAG untuk mencari informasi yang relevan
 
-### Query Types Supported
-- **Simple Search**: "cari laptop gaming"
-- **Superlative**: "produk termurah", "stok terbanyak"
-- **Budget Query**: "laptop di bawah 7 juta"
-- **Aggregation**: "total stok", "rata-rata harga"
+### Jenis Query yang Didukung
+- **Pencarian Sederhana**: "cari laptop gaming"
+- **Superlatif**: "produk termurah", "stok terbanyak"
+- **Query Budget**: "laptop di bawah 7 juta"
+- **Agregasi**: "total stok", "rata-rata harga"
 
 ---
 
-## 🗄️ Database Schema
+## 🗄️ Schema Database
 
 ### `uploaded_files`
-| Column | Type | Description |
-|--------|------|-------------|
+| Kolom | Tipe | Deskripsi |
+|-------|------|-----------|
 | id | INTEGER | Primary key |
-| filename | TEXT | Unique filename |
-| originalName | TEXT | Original file name |
-| fileType | TEXT | File type (csv, xlsx, xls) |
-| sheetName | TEXT | Sheet name (for Excel) |
-| headers | JSON | Column headers |
-| data | JSON | Row data |
-| rowCount | INTEGER | Number of rows |
-| createdAt | TIMESTAMP | Created timestamp |
+| filename | TEXT | Nama file unik |
+| originalName | TEXT | Nama file asli |
+| fileType | TEXT | Tipe file (csv, xlsx, xls) |
+| sheetName | TEXT | Nama sheet (untuk Excel) |
+| headers | JSON | Header kolom |
+| data | JSON | Data baris |
+| rowCount | INTEGER | Jumlah baris |
+| createdAt | TIMESTAMP | Waktu dibuat |
 
 ### `settings`
-| Column | Type | Description |
-|--------|------|-------------|
+| Kolom | Tipe | Deskripsi |
+|-------|------|-----------|
 | id | INTEGER | Primary key |
-| key | TEXT | Setting key |
-| value | TEXT | Setting value |
+| key | TEXT | Kunci pengaturan |
+| value | TEXT | Nilai pengaturan |
 
 ---
 
 ## 🧑‍💻 Development
 
 ```bash
-# Start development server
+# Jalankan development server
 npm run dev
 
-# Run linter
+# Jalankan linter
 npm run lint
 
-# Build for production
+# Build untuk production
 npm run build
 
-# Start production server
+# Jalankan production server
 npm run start
 
 # Database studio (Drizzle)
@@ -211,12 +211,12 @@ npx drizzle-kit studio
 
 ---
 
-## 📄 License
+## 📄 Lisensi
 
-MIT License - feel free to use this project for personal or commercial purposes.
+MIT License - bebas digunakan untuk keperluan pribadi maupun komersial.
 
 ---
 
 <div align="center">
-Made with ❤️ using Next.js and Ollama
+Dibuat dengan ❤️ menggunakan Next.js dan Ollama
 </div>
