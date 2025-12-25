@@ -66,7 +66,7 @@ Sebelum memulai, pastikan Anda telah menginstal:
 
 1. **Clone repository**
    ```bash
-   git clone https://github.com/yourusername/chatbot-local-ai.git
+   git clone https://github.com/w4nnnn/chatbot-local-ai.git
    cd chatbot-local-ai
    ```
 
