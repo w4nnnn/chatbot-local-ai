@@ -1,14 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, LogIn, AlertCircle } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+    Loader2, LogIn, AlertCircle, Bot, MessageSquare, Sparkles, Zap, Brain,
+    Cpu, Database, Globe, Layers, Terminal, Code, FileText, Folder,
+    Home, Settings, Star, Heart, Rocket, Shield, LaptopMinimal
+} from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { getSidebarBranding, type BrandingSettings } from "@/actions/settings";
+import type { ReactNode } from "react";
+
+// Map of Lucide icon names to components
+const iconMap: Record<string, ReactNode> = {
+    Bot: <Bot className="w-8 h-8 text-primary" />,
+    MessageSquare: <MessageSquare className="w-8 h-8 text-primary" />,
+    Sparkles: <Sparkles className="w-8 h-8 text-primary" />,
+    Zap: <Zap className="w-8 h-8 text-primary" />,
+    Brain: <Brain className="w-8 h-8 text-primary" />,
+    Cpu: <Cpu className="w-8 h-8 text-primary" />,
+    Database: <Database className="w-8 h-8 text-primary" />,
+    Globe: <Globe className="w-8 h-8 text-primary" />,
+    Layers: <Layers className="w-8 h-8 text-primary" />,
+    Terminal: <Terminal className="w-8 h-8 text-primary" />,
+    Code: <Code className="w-8 h-8 text-primary" />,
+    FileText: <FileText className="w-8 h-8 text-primary" />,
+    Folder: <Folder className="w-8 h-8 text-primary" />,
+    Home: <Home className="w-8 h-8 text-primary" />,
+    Settings: <Settings className="w-8 h-8 text-primary" />,
+    Star: <Star className="w-8 h-8 text-primary" />,
+    Heart: <Heart className="w-8 h-8 text-primary" />,
+    Rocket: <Rocket className="w-8 h-8 text-primary" />,
+    Shield: <Shield className="w-8 h-8 text-primary" />,
+    LaptopMinimal: <LaptopMinimal className="w-8 h-8 text-primary" />,
+};
 
 export default function LoginPage() {
     const router = useRouter();
@@ -16,6 +47,16 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [branding, setBranding] = useState<BrandingSettings>({
+        icon: "Bot",
+        iconType: "lucide",
+        title: "Local AI Chat"
+    });
+
+    // Load branding on mount
+    useEffect(() => {
+        getSidebarBranding().then(setBranding);
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,37 +83,36 @@ export default function LoginPage() {
         }
     };
 
+    const renderBrandIcon = () => {
+        if (branding.iconType === "image" && branding.icon) {
+            // Support both URL and base64
+            return (
+                <img
+                    src={branding.icon}
+                    alt="Logo"
+                    className="w-full h-full rounded-2xl object-cover"
+                />
+            );
+        }
+        return iconMap[branding.icon] || <Bot className="w-8 h-8 text-primary" />;
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background p-4">
             <div className="w-full max-w-md">
                 {/* Logo/Brand */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-                        <svg
-                            className="w-8 h-8 text-primary"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                            <path d="M2 17l10 5 10-5" />
-                            <path d="M2 12l10 5 10-5" />
-                        </svg>
+                        {renderBrandIcon()}
                     </div>
-                    <h1 className="text-2xl font-bold text-foreground">Local AI Chatbot</h1>
-                    <p className="text-muted-foreground mt-1">Chatbot AI Lokal yang Cerdas & Elegan</p>
+                    <h1 className="text-2xl font-bold text-foreground">{branding.title}</h1>
                 </div>
 
                 {/* Login Card */}
                 <Card className="border-border/50 shadow-xl">
                     <CardHeader className="space-y-1">
-                        <CardTitle className="text-xl">Masuk ke Akun</CardTitle>
-                        <CardDescription>
-                            Masukkan username dan password Anda untuk melanjutkan
-                        </CardDescription>
+                        <CardTitle className="text-xl">Login</CardTitle>
+                        <Separator />
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">

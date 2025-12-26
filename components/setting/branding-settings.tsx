@@ -112,7 +112,7 @@ export function BrandingSettings() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="lucide">Lucide Icon</SelectItem>
-                            <SelectItem value="image">Custom Image URL</SelectItem>
+                            <SelectItem value="image">Upload Gambar</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -147,16 +147,61 @@ export function BrandingSettings() {
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-2">
-                        <Label htmlFor="imageUrl">URL Gambar</Label>
-                        <Input
-                            id="imageUrl"
-                            value={localBranding.icon}
-                            onChange={(e) => handleLocalChange({ ...localBranding, icon: e.target.value })}
-                            placeholder="https://example.com/logo.png"
-                        />
+                    <div className="space-y-3">
+                        <Label>Upload Gambar</Label>
+
+                        {/* Preview */}
+                        {localBranding.icon && localBranding.icon.startsWith("data:") && (
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <img
+                                    src={localBranding.icon}
+                                    alt="Preview"
+                                    className="w-10 h-10 rounded object-contain"
+                                />
+                                <div className="flex-1">
+                                    <p className="text-sm text-gray-600">Gambar terpilih</p>
+                                    <p className="text-xs text-gray-400">Klik tombol di bawah untuk mengganti</p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                    onClick={() => handleLocalChange({ ...localBranding, icon: "", iconType: "lucide" })}
+                                >
+                                    Hapus
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Upload Input */}
+                        <div className="flex items-center gap-2">
+                            <Input
+                                id="imageUpload"
+                                type="file"
+                                accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        // Validate file size (max 100KB for base64 storage)
+                                        if (file.size > 100 * 1024) {
+                                            toast.error("Ukuran file maksimal 100KB");
+                                            return;
+                                        }
+
+                                        const reader = new FileReader();
+                                        reader.onload = (event) => {
+                                            const base64 = event.target?.result as string;
+                                            handleLocalChange({ ...localBranding, icon: base64 });
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                                className="cursor-pointer"
+                            />
+                        </div>
                         <p className="text-xs text-gray-500">
-                            Masukkan URL gambar untuk logo (disarankan ukuran 24x24 atau 32x32 pixel)
+                            Format: PNG, JPG, GIF, WebP, SVG. Ukuran maks: 100KB. Disarankan 32x32 atau 64x64 pixel.
                         </p>
                     </div>
                 )}

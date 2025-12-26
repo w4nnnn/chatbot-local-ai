@@ -9,9 +9,9 @@ const THEME_KEY = "color_theme";
 const DEFAULT_THEME: ColorTheme = "violet";
 
 // Branding settings keys
-const BRANDING_ICON_KEY = "sidebar_icon";
-const BRANDING_ICON_TYPE_KEY = "sidebar_icon_type";
-const BRANDING_TITLE_KEY = "sidebar_title";
+const BRANDING_ICON_KEY = "brand_icon";
+const BRANDING_ICON_TYPE_KEY = "brand_icon_type";
+const BRANDING_TITLE_KEY = "brand_title";
 
 export type IconType = "lucide" | "image";
 

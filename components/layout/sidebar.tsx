@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
 import { useBranding } from "@/components/setting";
 import { ProfileDialog } from "@/components/users";
-import Image from "next/image";
 
 export type MenuType = "chat" | "upload" | "users" | "permissions" | "settings";
 
@@ -108,14 +107,13 @@ export function Sidebar({
     };
 
     const renderBrandIcon = () => {
-        if (branding.iconType === "image") {
+        if (branding.iconType === "image" && branding.icon) {
+            // Support both URL and base64
             return (
-                <Image
+                <img
                     src={branding.icon}
                     alt="Logo"
-                    width={24}
-                    height={24}
-                    className="rounded"
+                    className="w-full h-full rounded object-cover"
                 />
             );
         }
@@ -154,7 +152,7 @@ export function Sidebar({
                     {/* Brand */}
                     <div className="p-6 border-b border-gray-100">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-primary rounded-xl shadow-lg">
+                            <div className="w-15 h-15 flex-shrink-0 bg-primary rounded-xl shadow-lg overflow-hidden flex items-center justify-center">
                                 {renderBrandIcon()}
                             </div>
                             <div>
