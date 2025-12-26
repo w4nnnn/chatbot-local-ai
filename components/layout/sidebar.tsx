@@ -1,19 +1,51 @@
 "use client";
 
-import { MessageSquare, Upload, Bot, Menu, X } from "lucide-react";
+import {
+    MessageSquare, Upload, Menu, X, Users, Shield, LogOut, Settings, Bot,
+    Brain, Cpu, Database, Globe, Layers, Terminal, Code, FileText, Folder, Home,
+    Star, Heart, Zap, Rocket, Sparkles
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeSelector } from "@/components/theme-selector";
 import { cn } from "@/lib/utils";
+import { signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { type ReactNode } from "react";
+import { useBranding } from "@/components/setting";
+import Image from "next/image";
 
-export type MenuType = "chat" | "upload";
+export type MenuType = "chat" | "upload" | "users" | "permissions" | "settings";
 
 interface MenuItem {
     id: MenuType;
     label: string;
-    icon: React.ReactNode;
+    icon: ReactNode;
 }
 
-const menuItems: MenuItem[] = [
+// Map of Lucide icon names to components
+const iconMap: Record<string, ReactNode> = {
+    Bot: <Bot className="h-6 w-6 text-white" />,
+    MessageSquare: <MessageSquare className="h-6 w-6 text-white" />,
+    Sparkles: <Sparkles className="h-6 w-6 text-white" />,
+    Zap: <Zap className="h-6 w-6 text-white" />,
+    Brain: <Brain className="h-6 w-6 text-white" />,
+    Cpu: <Cpu className="h-6 w-6 text-white" />,
+    Database: <Database className="h-6 w-6 text-white" />,
+    Globe: <Globe className="h-6 w-6 text-white" />,
+    Layers: <Layers className="h-6 w-6 text-white" />,
+    Terminal: <Terminal className="h-6 w-6 text-white" />,
+    Code: <Code className="h-6 w-6 text-white" />,
+    FileText: <FileText className="h-6 w-6 text-white" />,
+    Folder: <Folder className="h-6 w-6 text-white" />,
+    Home: <Home className="h-6 w-6 text-white" />,
+    Settings: <Settings className="h-6 w-6 text-white" />,
+    Star: <Star className="h-6 w-6 text-white" />,
+    Heart: <Heart className="h-6 w-6 text-white" />,
+    Rocket: <Rocket className="h-6 w-6 text-white" />,
+    Shield: <Shield className="h-6 w-6 text-white" />,
+};
+
+// All available menu items - filtering happens based on permissions
+const allMenuItems: MenuItem[] = [
     {
         id: "chat",
         label: "Chatbot",
@@ -24,6 +56,21 @@ const menuItems: MenuItem[] = [
         label: "Upload Data",
         icon: <Upload className="h-5 w-5" />,
     },
+    {
+        id: "users",
+        label: "Kelola User",
+        icon: <Users className="h-5 w-5" />,
+    },
+    {
+        id: "permissions",
+        label: "Role & Permission",
+        icon: <Shield className="h-5 w-5" />,
+    },
+    {
+        id: "settings",
+        label: "Pengaturan",
+        icon: <Settings className="h-5 w-5" />,
+    },
 ];
 
 interface SidebarProps {
@@ -31,9 +78,47 @@ interface SidebarProps {
     onMenuChange: (menu: MenuType) => void;
     isOpen: boolean;
     onToggle: () => void;
+    accessibleMenus?: string[];
+    userName?: string;
+    userRole?: string;
 }
 
-export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarProps) {
+export function Sidebar({
+    activeMenu,
+    onMenuChange,
+    isOpen,
+    onToggle,
+    accessibleMenus = ["chat"],
+    userName,
+    userRole,
+}: SidebarProps) {
+    const router = useRouter();
+    const { branding } = useBranding();
+
+    // Filter menu items based on accessible menus
+    const menuItems = allMenuItems.filter((item) => accessibleMenus.includes(item.id));
+
+    const handleLogout = async () => {
+        await signOut();
+        router.push("/login");
+        router.refresh();
+    };
+
+    const renderBrandIcon = () => {
+        if (branding.iconType === "image") {
+            return (
+                <Image
+                    src={branding.icon}
+                    alt="Logo"
+                    width={24}
+                    height={24}
+                    className="rounded"
+                />
+            );
+        }
+        return iconMap[branding.icon] || <Bot className="h-6 w-6 text-white" />;
+    };
+
     return (
         <>
             {/* Mobile Hamburger Button */}
@@ -67,13 +152,12 @@ export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarP
                     <div className="p-6 border-b border-gray-100">
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-primary rounded-xl shadow-lg">
-                                <Bot className="h-6 w-6 text-white" />
+                                {renderBrandIcon()}
                             </div>
                             <div>
                                 <h1 className="text-lg font-bold text-gray-800">
-                                    Local AI Chat
+                                    {branding.title}
                                 </h1>
-                                <p className="text-xs text-gray-400">Powered by Ollama</p>
                             </div>
                         </div>
                     </div>
@@ -107,19 +191,23 @@ export function Sidebar({ activeMenu, onMenuChange, isOpen, onToggle }: SidebarP
                                 </button>
                             );
                         })}
-
-                        {/* Separator */}
-                        <div className="pt-4 mt-4 border-t border-gray-100">
-                            <p className="text-xs text-gray-400 px-4 mb-2">Pengaturan</p>
-                            <ThemeSelector />
-                        </div>
                     </nav>
 
-                    {/* Footer */}
-                    <div className="p-4 border-t border-gray-100">
-                        <p className="text-xs text-gray-300 text-center">
-                            © 2024 Local AI Chatbot
-                        </p>
+                    {/* User Info & Logout */}
+                    <div className="p-4 border-t border-gray-100 space-y-3">
+                        {userName && (
+                            <div className="px-4 py-2 bg-gray-50 rounded-xl">
+                                <p className="text-sm font-medium text-gray-700 truncate">{userName}</p>
+                                <p className="text-xs text-gray-400 capitalize">{userRole || "user"}</p>
+                            </div>
+                        )}
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                        >
+                            <LogOut className="h-5 w-5" />
+                            <span className="font-medium">Keluar</span>
+                        </button>
                     </div>
                 </div>
             </aside>

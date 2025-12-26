@@ -7,9 +7,19 @@ interface MainLayoutProps {
     children: React.ReactNode;
     activeMenu: MenuType;
     onMenuChange: (menu: MenuType) => void;
+    accessibleMenus?: string[];
+    userName?: string;
+    userRole?: string;
 }
 
-export function MainLayout({ children, activeMenu, onMenuChange }: MainLayoutProps) {
+export function MainLayout({
+    children,
+    activeMenu,
+    onMenuChange,
+    accessibleMenus = ["chat"],
+    userName,
+    userRole,
+}: MainLayoutProps) {
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
     return (
@@ -19,6 +29,9 @@ export function MainLayout({ children, activeMenu, onMenuChange }: MainLayoutPro
                 onMenuChange={onMenuChange}
                 isOpen={sidebarOpen}
                 onToggle={() => setSidebarOpen(!sidebarOpen)}
+                accessibleMenus={accessibleMenus}
+                userName={userName}
+                userRole={userRole}
             />
 
             {/* Main Content */}

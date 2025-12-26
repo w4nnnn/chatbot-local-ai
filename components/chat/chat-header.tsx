@@ -15,8 +15,8 @@ export function ChatHeader({ }: ChatHeaderProps) {
                     <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                    <CardTitle className="text-lg text-gray-800">Chatbot AI Lokal</CardTitle>
-                    <p className="text-xs text-primary/60">Didukung oleh Ollama • RAG Mode</p>
+                    <CardTitle className="text-lg text-gray-800">Chatbot</CardTitle>
+                    <p className="text-xs text-primary/60">Menggunakan Local AI</p>
                 </div>
             </div>
         </CardHeader>

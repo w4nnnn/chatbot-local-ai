@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 // Routes yang tidak memerlukan autentikasi
 const publicRoutes = ["/login", "/api/auth"];
-
-// Routes yang hanya untuk admin/superadmin
-const adminRoutes = ["/admin"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
