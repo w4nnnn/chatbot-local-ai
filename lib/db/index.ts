@@ -4,7 +4,7 @@ import * as schema from "./schema";
 import { existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
 
-const dbPath = "./data/local.db";
+const dbPath = process.env.DATABASE_URL || "./data/local.db";
 
 // Pastikan folder data ada
 const dir = dirname(dbPath);

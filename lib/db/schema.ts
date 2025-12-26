@@ -1,5 +1,8 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+// Re-export auth schema tables
+export * from "../../auth-schema";
+
 export const uploadedFiles = sqliteTable("uploaded_files", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     filename: text("filename").notNull(),
