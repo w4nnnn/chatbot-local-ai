@@ -132,11 +132,6 @@ export default function LoginPage() {
                         </form>
                     </CardContent>
                 </Card>
-
-                {/* Footer */}
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                    Gunakan script <code className="text-xs bg-muted px-1 py-0.5 rounded">add-user.ts</code> untuk membuat akun baru
-                </p>
             </div>
         </div>
     );

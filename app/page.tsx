@@ -74,7 +74,7 @@ export default function HomePage() {
         switch (activeMenu) {
             case "chat":
                 return (
-                    <div className="max-w-3xl mx-auto h-[calc(100vh-6rem)]">
+                    <div className="max-w-5xl mx-auto h-[calc(100vh-6rem)]">
                         <ChatInterface />
                     </div>
                 );
@@ -88,7 +88,7 @@ export default function HomePage() {
                 return <SettingsPage />;
             default:
                 return (
-                    <div className="max-w-3xl mx-auto h-[calc(100vh-6rem)]">
+                    <div className="max-w-5xl mx-auto h-[calc(100vh-6rem)]">
                         <ChatInterface />
                     </div>
                 );

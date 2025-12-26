@@ -4,7 +4,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import {
     Image, Type, Loader2, Bot, MessageSquare, Sparkles, Zap, Brain,
     Cpu, Database, Globe, Layers, Terminal, Code, FileText, Folder,
-    Home, Settings, Star, Heart, Rocket, Shield
+    Home, Settings, Star, Heart, Rocket, Shield, LaptopMinimal
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,7 @@ const iconComponents: Record<string, ReactNode> = {
     Heart: <Heart className="h-5 w-5" />,
     Rocket: <Rocket className="h-5 w-5" />,
     Shield: <Shield className="h-5 w-5" />,
+    LaptopMinimal: <LaptopMinimal className="h-5 w-5" />,
 };
 
 // Popular Lucide icons for branding

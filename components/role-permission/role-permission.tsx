@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import {
     Table,
     TableBody,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Loader2, Info } from "lucide-react";
+import { Shield, Loader2, Info, MessageSquare, Upload, Users, Settings } from "lucide-react";
 import { getRolePermissions, updateRolePermission } from "@/actions/role-permissions";
 import { AVAILABLE_ROLES, AVAILABLE_MENUS } from "@/lib/db/schema";
 import { toast } from "sonner";
@@ -21,6 +21,15 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+// Map menu ids to icons
+const menuIcons: Record<string, ReactNode> = {
+    chat: <MessageSquare className="h-4 w-4" />,
+    upload: <Upload className="h-4 w-4" />,
+    users: <Users className="h-4 w-4" />,
+    permissions: <Shield className="h-4 w-4" />,
+    settings: <Settings className="h-4 w-4" />,
+};
 
 type PermissionMatrix = Record<string, Record<string, boolean>>;
 
@@ -145,7 +154,12 @@ export function RolePermission() {
                         <TableBody>
                             {AVAILABLE_MENUS.map((menu) => (
                                 <TableRow key={menu.id}>
-                                    <TableCell className="font-medium">{menu.label}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-gray-500">{menuIcons[menu.id]}</span>
+                                            {menu.label}
+                                        </div>
+                                    </TableCell>
                                     {AVAILABLE_ROLES.map((role) => {
                                         const cellKey = `${role}-${menu.id}`;
                                         const isUpdating = updatingCell === cellKey;

@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import {
     MessageSquare, Upload, Menu, X, Users, Shield, LogOut, Settings, Bot,
     Brain, Cpu, Database, Globe, Layers, Terminal, Code, FileText, Folder, Home,
-    Star, Heart, Zap, Rocket, Sparkles
+    Star, Heart, Zap, Rocket, Sparkles, Pencil
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { type ReactNode } from "react";
 import { useBranding } from "@/components/setting";
+import { ProfileDialog } from "@/components/users";
 import Image from "next/image";
 
 export type MenuType = "chat" | "upload" | "users" | "permissions" | "settings";
@@ -94,6 +96,7 @@ export function Sidebar({
 }: SidebarProps) {
     const router = useRouter();
     const { branding } = useBranding();
+    const [showProfileDialog, setShowProfileDialog] = useState(false);
 
     // Filter menu items based on accessible menus
     const menuItems = allMenuItems.filter((item) => accessibleMenus.includes(item.id));
@@ -196,10 +199,18 @@ export function Sidebar({
                     {/* User Info & Logout */}
                     <div className="p-4 border-t border-gray-100 space-y-3">
                         {userName && (
-                            <div className="px-4 py-2 bg-gray-50 rounded-xl">
-                                <p className="text-sm font-medium text-gray-700 truncate">{userName}</p>
-                                <p className="text-xs text-gray-400 capitalize">{userRole || "user"}</p>
-                            </div>
+                            <button
+                                onClick={() => setShowProfileDialog(true)}
+                                className="w-full px-4 py-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-200 group text-left"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium text-gray-700 truncate">{userName}</p>
+                                        <p className="text-xs text-gray-400 capitalize">{userRole || "user"}</p>
+                                    </div>
+                                    <Pencil className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                            </button>
                         )}
                         <button
                             onClick={handleLogout}
@@ -211,6 +222,16 @@ export function Sidebar({
                     </div>
                 </div>
             </aside>
+
+            {/* Profile Dialog */}
+            {userName && (
+                <ProfileDialog
+                    open={showProfileDialog}
+                    onOpenChange={setShowProfileDialog}
+                    userName={userName}
+                    userRole={userRole || "user"}
+                />
+            )}
         </>
     );
 }

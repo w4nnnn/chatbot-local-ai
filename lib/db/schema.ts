@@ -71,3 +71,22 @@ export const AVAILABLE_MENUS = [
 ] as const;
 export type MenuId = typeof AVAILABLE_MENUS[number]["id"];
 
+// Chat History table untuk menyimpan riwayat percakapan
+export const chatHistory = sqliteTable("chat_history", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("user_id").notNull(), // ID user dari auth
+    userMessage: text("user_message").notNull(), // Pesan dari user
+    aiResponse: text("ai_response").notNull(), // Jawaban dari AI
+    isRAGUsed: integer("is_rag_used", { mode: "boolean" }).default(false).notNull(),
+    sources: text("sources", { mode: "json" }).$type<{
+        fileName: string;
+        text: string;
+    }[]>(), // Sumber data yang digunakan (simplified)
+    responseTime: integer("response_time"), // Response time dalam ms
+    createdAt: integer("created_at", { mode: "timestamp" })
+        .notNull()
+        .$defaultFn(() => new Date()),
+});
+
+export type ChatHistoryEntry = typeof chatHistory.$inferSelect;
+export type NewChatHistoryEntry = typeof chatHistory.$inferInsert;

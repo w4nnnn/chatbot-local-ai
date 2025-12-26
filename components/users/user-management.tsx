@@ -147,7 +147,6 @@ export function UserManagement() {
                                 <TableHead>Username</TableHead>
                                 <TableHead>Nama</TableHead>
                                 <TableHead>Role</TableHead>
-                                <TableHead>Status</TableHead>
                                 <TableHead>Dibuat</TableHead>
                                 <TableHead className="w-[80px]"></TableHead>
                             </TableRow>
@@ -161,15 +160,6 @@ export function UserManagement() {
                                         <Badge variant={roleBadgeVariants[u.role || "user"] || "outline"}>
                                             {u.role || "user"}
                                         </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        {u.banned ? (
-                                            <Badge variant="destructive">Banned</Badge>
-                                        ) : (
-                                            <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
-                                                Aktif
-                                            </Badge>
-                                        )}
                                     </TableCell>
                                     <TableCell className="text-gray-500">{formatDate(u.createdAt)}</TableCell>
                                     <TableCell>

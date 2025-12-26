@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { parseFile, saveToDatabase, getUploadedFiles, deleteFile, getExcelSheets } from "@/actions/upload";
 import { embedFileData, deleteFileEmbeddings } from "@/actions/embed";
 import { toast } from "sonner";
+import { Upload } from "lucide-react";
 
 import {
     UploadDropzone,
@@ -338,7 +339,18 @@ export function UploadContent() {
     // ============================================
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                    <Upload className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Upload Data</h1>
+                    <p className="text-sm text-gray-500">Upload dan kelola file data untuk RAG</p>
+                </div>
+            </div>
+
             {/* Upload Dropzone */}
             <UploadDropzone
                 isLoading={isLoading}

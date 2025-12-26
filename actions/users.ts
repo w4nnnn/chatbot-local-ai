@@ -13,7 +13,6 @@ export type UserData = {
     email: string;
     username: string | null;
     role: string | null;
-    banned: boolean | null;
     createdAt: Date;
 };
 
@@ -39,7 +38,6 @@ export async function getUsers() {
                 email: user.email,
                 username: user.username,
                 role: user.role,
-                banned: user.banned,
                 createdAt: user.createdAt,
             })
             .from(user)
@@ -137,7 +135,6 @@ export type UpdateUserInput = {
     name?: string;
     email?: string;
     role?: string;
-    banned?: boolean;
 };
 
 /**
@@ -160,16 +157,10 @@ export async function updateUser(userId: string, input: UpdateUserInput) {
             return { success: false, error: "Anda tidak bisa menurunkan role diri sendiri" };
         }
 
-        // Prevent superadmin from banning themselves
-        if (userId === session.user.id && input.banned) {
-            return { success: false, error: "Anda tidak bisa memban diri sendiri" };
-        }
-
         const updateData: Record<string, unknown> = { updatedAt: new Date() };
         if (input.name) updateData.name = input.name;
         if (input.email) updateData.email = input.email;
         if (input.role) updateData.role = input.role;
-        if (input.banned !== undefined) updateData.banned = input.banned;
 
         await db.update(user).set(updateData).where(eq(user.id, userId));
 
@@ -208,5 +199,52 @@ export async function deleteUser(userId: string) {
     } catch (error) {
         console.error("Error deleting user:", error);
         return { success: false, error: "Gagal menghapus user" };
+    }
+}
+
+export type UpdateOwnProfileInput = {
+    name?: string;
+    password?: string;
+};
+
+/**
+ * Update own profile (name and/or password)
+ */
+export async function updateOwnProfile(input: UpdateOwnProfileInput) {
+    try {
+        const session = await getSession();
+        if (!session) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const userId = session.user.id;
+
+        // Update name if provided
+        if (input.name) {
+            await db
+                .update(user)
+                .set({ name: input.name, updatedAt: new Date() })
+                .where(eq(user.id, userId));
+        }
+
+        // Update password if provided
+        if (input.password) {
+            // Use Better-Auth to change password
+            const ctx = await auth.$context;
+            const hashedPassword = await ctx.password.hash(input.password);
+
+            // Password is stored in the account table
+            const { account } = await import("@/lib/db/schema");
+            await db
+                .update(account)
+                .set({ password: hashedPassword, updatedAt: new Date() })
+                .where(eq(account.userId, userId));
+        }
+
+        revalidatePath("/");
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating own profile:", error);
+        return { success: false, error: "Gagal memperbarui profil" };
     }
 }
